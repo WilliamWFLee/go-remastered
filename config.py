@@ -56,7 +56,7 @@ class ConfigDialog:
         square_width = int(square_width) if square_width else 0
 
         if not board_size:
-            board_size = 19
+            board_size = None
         elif board_size not in (9, 13, 19):
             messagebox.showerror(
                 title="Error",
@@ -67,7 +67,7 @@ class ConfigDialog:
             return
 
         if not square_width:
-            square_width = 50
+            square_width = None
         elif square_width < 5:
             messagebox.showerror(
                 title="Error",
@@ -78,8 +78,7 @@ class ConfigDialog:
             )
             self._square_width_label.config(fg="red")
             return
-
-        if square_width < 15:
+        elif square_width < 15:
             messagebox.showwarning(
                 title="Warning",
                 message=(
@@ -87,7 +86,7 @@ class ConfigDialog:
                     "may make text unreadable"
                 ),
             )
-        if square_width < 10:
+        elif square_width < 10:
             messagebox.showwarning(
                 title="Warning",
                 message=(
