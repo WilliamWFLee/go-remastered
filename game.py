@@ -2,6 +2,9 @@
 
 from enum import Enum
 
+import pygame
+from pygame.locals import QUIT
+
 LINE_WIDTH = 2
 BOARD_COLOUR = (220, 181, 121)
 DEFAULT_BOARD_SIZE = 19
@@ -62,3 +65,18 @@ class Go:
         self.current_color = Color.BLACK
         self.history = []
         self.history_position = 0
+
+    def run(self):
+        pygame.init()
+        pygame.display.set_caption("Go")
+        pygame.key.set_repeat(KEY_REPEAT_DELAY, KEY_REPEAT_INTERVAL)
+
+        self.display = pygame.display.set_mode(self.screen_dimensions)
+
+        running = True
+        while running:
+            for e in pygame.event.get():
+                if e.type == QUIT:
+                    pygame.quit()
+                    running = False
+                    break
