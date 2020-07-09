@@ -720,9 +720,3 @@ class Application:
                 self.render()
                 clock.tick()
                 print(clock.get_fps(), end="\r")
-
-
-if __name__ == "__main__":
-    os.chdir(os.path.dirname(__file__))
-    app = Application()
-    app.run_game()
