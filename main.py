@@ -1,0 +1,6 @@
+# -*- coding: utf-8 -*-
+"""
+A graphical version of the board game Go
+Copyright (c) 2020 William Lee
+"""
+
