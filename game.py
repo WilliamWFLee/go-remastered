@@ -3,6 +3,7 @@
 from enum import Enum
 
 import pygame
+import pygame.gfxdraw
 from pygame.locals import QUIT
 
 LINE_WIDTH = 2
@@ -66,6 +67,48 @@ class Go:
         self.history = []
         self.history_position = 0
 
+    def draw_board(self):
+        self.display.fill(BOARD_COLOUR)  # Set board colour
+        for x in range(self.board_size):  # Draws lines
+            start = (
+                int((x + 0.5) * self.square_width),
+                self.square_width // 2,
+            )
+            end = (
+                int((x + 0.5) * self.square_width),
+                self.board_width - self.square_width // 2,
+            )
+            pygame.draw.line(
+                self.display, FG_COLOUR, start, end, LINE_WIDTH
+            )
+        for y in range(self.board_size):
+            start = (
+                self.square_width // 2,
+                int((y + 0.5) * self.square_width),
+            )
+            end = (
+                self.board_width - self.square_width // 2,
+                int((y + 0.5) * self.square_width),
+            )
+            pygame.draw.line(
+                self.display, FG_COLOUR, start, end, LINE_WIDTH
+            )
+
+        # Draws hoshi positions
+        for x, y in HOSHI_POSITIONS[self.board_size]:
+            for f in (pygame.gfxdraw.filled_circle, pygame.gfxdraw.aacircle):
+                f(
+                    self.display,
+                    int((x + 0.5) * self.square_width),
+                    int((y + 0.5) * self.square_width),
+                    self.hoshi_radius,
+                    FG_COLOUR,
+                )
+
+    def render(self):
+        self.draw_board()
+        pygame.display.update()
+
     def run(self):
         pygame.init()
         pygame.display.set_caption("Go")
@@ -80,3 +123,5 @@ class Go:
                     pygame.quit()
                     running = False
                     break
+            if running:
+                self.render()

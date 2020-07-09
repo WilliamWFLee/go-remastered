@@ -7,6 +7,7 @@ Copyright (c) 2020 William Lee
 from config import ConfigDialog
 from game import Go
 
+
 def main():
     config_dialog = ConfigDialog()
     config = config_dialog.get_config()
