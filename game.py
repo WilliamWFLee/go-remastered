@@ -1,10 +1,12 @@
 # -*- coding: utf-8 -*-
 
 from enum import Enum
+from functools import total_ordering
+from typing import Sequence
 
 import pygame
 import pygame.gfxdraw
-from pygame.locals import QUIT
+from pygame.locals import MOUSEBUTTONDOWN, MOUSEMOTION, QUIT
 
 LINE_WIDTH = 2
 BOARD_COLOUR = (220, 181, 121)
@@ -38,12 +40,40 @@ class Color(Enum):
     WHITE = 1
 
 
+@total_ordering
+class Position:
+    def __init__(self, x: int, y: int):
+        self.x = x
+        self.y = y
+
+    @classmethod
+    def from_mouse_pos(cls, x: int, y: int, square_width: int):
+        return cls(x // square_width, y // square_width)
+
+    @classmethod
+    def from_tuple(cls, pos: Sequence[int], square_width: int):
+        return cls.from_mouse_pos(*pos, square_width)
+
+    def __lt__(self, other):
+        if type(other) != type(self):
+            return NotImplemented
+        else:
+            return self.x < other.x or self.y < other.y
+
+    def __eq__(self, other):
+        if type(other) != type(self):
+            return NotImplemented
+        else:
+            return self.x == other.x and self.y == other.y
+
+
 class Go:
     """
     Class for representing a game of Go
     """
 
     def __init__(self, board_size: int = None, square_width: int = None):
+        # Game dimensions
         self.board_size = (
             board_size if board_size is not None else DEFAULT_BOARD_SIZE
         )
@@ -63,9 +93,8 @@ class Go:
             self.board_width,
         )
 
+        # Game state
         self.current_color = Color.BLACK
-        self.history = []
-        self.history_position = 0
 
     def draw_board(self):
         self.display.fill(BOARD_COLOUR)  # Set board colour
@@ -78,9 +107,7 @@ class Go:
                 int((x + 0.5) * self.square_width),
                 self.board_width - self.square_width // 2,
             )
-            pygame.draw.line(
-                self.display, FG_COLOUR, start, end, LINE_WIDTH
-            )
+            pygame.draw.line(self.display, FG_COLOUR, start, end, LINE_WIDTH)
         for y in range(self.board_size):
             start = (
                 self.square_width // 2,
@@ -90,9 +117,7 @@ class Go:
                 self.board_width - self.square_width // 2,
                 int((y + 0.5) * self.square_width),
             )
-            pygame.draw.line(
-                self.display, FG_COLOUR, start, end, LINE_WIDTH
-            )
+            pygame.draw.line(self.display, FG_COLOUR, start, end, LINE_WIDTH)
 
         # Draws hoshi positions
         for x, y in HOSHI_POSITIONS[self.board_size]:
