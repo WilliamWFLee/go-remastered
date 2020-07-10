@@ -94,7 +94,7 @@ class Position(PositionBase):
         return super().__hash__()
 
 
-class Stone(Graphic):
+class Ring(Graphic):
     def __init__(
         self, pos: Position, color: Color, square_width: int, radius: int
     ):
@@ -102,19 +102,31 @@ class Stone(Graphic):
         self.color = color
         self.square_width = square_width
         self.radius = radius
-        self.group = Group(color, self)
-        self.liberties = {direction: True for direction in Direction}
 
-    def update(self, display):
-        options = (
-            display,
+    @property
+    def _draw_options(self):
+        return (
             int((self.pos.x + 0.5) * self.square_width),
             int((self.pos.y + 0.5) * self.square_width),
             self.radius,
             self.color.value,
         )
-        for f in (pygame.gfxdraw.aacircle, pygame.gfxdraw.filled_circle):
-            f(*options)
+
+    def update(self, display):
+        pygame.gfxdraw.aacircle(display, *self._draw_options)
+
+
+class Stone(Ring):
+    def __init__(
+        self, pos: Position, color: Color, square_width: int, radius: int
+    ):
+        super().__init__(pos, color, square_width, radius)
+        self.group = Group(color, self)
+        self.liberties = {direction: True for direction in Direction}
+
+    def update(self, display):
+        super().update(display)
+        pygame.gfxdraw.filled_circle(display, *self._draw_options)
 
     @property
     def is_free(self):
@@ -177,6 +189,7 @@ class Go:
         # Game state
         self.current_color = Color.BLACK
         self.stones: Dict[Position, Stone] = {}
+        self.highlight = None  # Indicates whose turn it is
 
     @property
     def groups(self) -> Dict[Color, Set[Group]]:
@@ -261,10 +274,9 @@ class Go:
         for stone in self.stones.values():
             for direction in Direction:
                 adj_pos = stone.pos + direction.value
-                if (
-                    (0, 0) <= adj_pos <= 2 * (self.board_size,)
-                    and adj_pos not in self.stones
-                ):
+                if (0, 0) <= adj_pos <= 2 * (
+                    self.board_size,
+                ) and adj_pos not in self.stones:
                     stone.liberties[direction] = True
                 else:
                     stone.liberties[direction] = False
