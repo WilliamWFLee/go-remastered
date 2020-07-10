@@ -37,7 +37,7 @@ STAT_SCALE = {
 
 
 class Graphic:
-    def update(self):
+    def update(self, display):
         raise NotImplementedError
 
 
