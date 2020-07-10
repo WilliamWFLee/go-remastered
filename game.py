@@ -10,14 +10,14 @@ import pygame.gfxdraw
 from pygame.locals import MOUSEBUTTONDOWN, MOUSEMOTION, QUIT
 
 LINE_WIDTH = 2
-BOARD_COLOUR = (220, 181, 121)
+BOARD_COLOR = (220, 181, 121)
 DEFAULT_BOARD_SIZE = 19
 DEFAULT_SQUARE_WIDTH = 50
-DEFAULT_COLOURS = [
+DEFAULT_COLORS = [
     (0, 0, 0),
     (255, 255, 255),
 ]
-FG_COLOUR = (0, 0, 0)
+FG_COLOR = (0, 0, 0)
 KEY_REPEAT_DELAY = 300
 KEY_REPEAT_INTERVAL = 5
 BOARD_SIZES = (9, 13, 19)
@@ -137,7 +137,7 @@ class Go:
         self.stones: Dict[Position, Stone] = {}
 
     def draw_board(self):
-        self.display.fill(BOARD_COLOUR)  # Set board colour
+        self.display.fill(BOARD_COLOR)  # Set board color
         for x in range(self.board_size):  # Draws lines
             start = (
                 int((x + 0.5) * self.square_width),
@@ -147,7 +147,7 @@ class Go:
                 int((x + 0.5) * self.square_width),
                 self.board_width - self.square_width // 2,
             )
-            pygame.draw.line(self.display, FG_COLOUR, start, end, LINE_WIDTH)
+            pygame.draw.line(self.display, FG_COLOR, start, end, LINE_WIDTH)
         for y in range(self.board_size):
             start = (
                 self.square_width // 2,
@@ -157,7 +157,7 @@ class Go:
                 self.board_width - self.square_width // 2,
                 int((y + 0.5) * self.square_width),
             )
-            pygame.draw.line(self.display, FG_COLOUR, start, end, LINE_WIDTH)
+            pygame.draw.line(self.display, FG_COLOR, start, end, LINE_WIDTH)
 
         # Draws hoshi positions
         for x, y in HOSHI_POSITIONS[self.board_size]:
@@ -167,7 +167,7 @@ class Go:
                     int((x + 0.5) * self.square_width),
                     int((y + 0.5) * self.square_width),
                     self.hoshi_radius,
-                    FG_COLOUR,
+                    FG_COLOR,
                 )
 
     def render(self):
