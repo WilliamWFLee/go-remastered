@@ -80,6 +80,16 @@ class Position(PositionBase):
             return self.x == other[0] and self.y == other[1]
         return NotImplemented
 
+    def __add__(self, other):
+        if isinstance(other, type(self)):
+            return type(self)(self.x + other.x, self.y + other.y)
+        elif isinstance(other, tuple):
+            return type(self)(self.x + other[0], self.y + other[1])
+        return NotImplemented
+
+    def __radd__(self, other):
+        return self.__add__(other)
+
     def __hash__(self):
         return super().__hash__()
 
