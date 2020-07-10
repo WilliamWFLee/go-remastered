@@ -3,7 +3,7 @@
 from collections import namedtuple
 from enum import Enum
 from functools import total_ordering
-from typing import Sequence, Dict
+from typing import Dict, List, Sequence, Set
 
 import pygame
 import pygame.gfxdraw
@@ -102,6 +102,7 @@ class Stone(Graphic):
         self.color = color
         self.square_width = square_width
         self.radius = radius
+        self.group = Group(color, self)
         self.liberties = {direction: True for direction in Direction}
 
     def update(self, display):
@@ -114,6 +115,29 @@ class Stone(Graphic):
         )
         for f in (pygame.gfxdraw.aacircle, pygame.gfxdraw.filled_circle):
             f(*options)
+
+
+class Group:
+    def __init__(self, color: Color, *stones: Stone):
+        self.color = color
+        self.stones = list(stones)
+
+    def __iter__(self):
+        return iter(self.stones)
+
+    @classmethod
+    def merge(cls, groups: List["Group"]):
+        if len(groups) == 1:
+            return groups[0]
+
+        color = groups[0].color
+        new_group = cls(color)
+        for group in groups:
+            for stone in group:
+                new_group.stones += [stone]
+                stone.group = new_group
+
+        return new_group
 
 
 class Go:
@@ -145,6 +169,14 @@ class Go:
         # Game state
         self.current_color = Color.BLACK
         self.stones: Dict[Position, Stone] = {}
+
+    @property
+    def groups(self) -> Dict[Color, Set[Group]]:
+        groups = set()
+        for stone in self.stones.values():
+            groups.add(stone.group)
+
+        return list(groups)
 
     def draw_board(self):
         self.display.fill(BOARD_COLOR)  # Set board color
@@ -186,20 +218,31 @@ class Go:
         )
 
     def place_stone(self, pos):
-        stone = Stone(
+        new_stone = Stone(
             pos, self.current_color, self.square_width, self.stone_radius
         )
-        self.stones[pos] = stone
+        self.stones[pos] = new_stone
+        merge_groups = [new_stone.group]
+        for direction in Direction:
+            adj_pos = new_stone.pos + direction.value
+            if (
+                adj_pos in self.stones
+                and self.stones[adj_pos].color == new_stone.color
+            ):
+                merge_groups += [self.stones[adj_pos].group]
+
+        Group.merge(merge_groups)
+
         self.update_liberties()
         self.toggle_color()
 
     def update_liberties(self):
         for stone in self.stones.values():
             for direction in Direction:
-                adj_stone = stone.pos + direction.value
+                adj_pos = stone.pos + direction.value
                 if (
-                    adj_stone <= 2 * (self.board_size,)
-                    and adj_stone not in self.stones
+                    adj_pos <= 2 * (self.board_size,)
+                    and adj_pos not in self.stones
                 ):
                     stone.liberties[direction] = True
                 else:
