@@ -42,8 +42,8 @@ class Graphic:
 
 
 class Color(Enum):
-    BLACK = 0
-    WHITE = 1
+    BLACK = (0, 0, 0)
+    WHITE = (255, 255, 255)
 
 
 class Direction(Enum):
@@ -86,6 +86,17 @@ class Stone(Graphic):
         self.pos = pos
         self.color = color
         self.liberties = {direction: True for direction in Direction}
+
+    def update(self, display, square_width, radius):
+        options = (
+            display,
+            int((self.pos.x + 0.5) * square_width),
+            int((self.pos.y + 0.5) * square_width),
+            self.radius,
+            self.color.value(),
+        )
+        for f in (pygame.gfxdraw.aacircle, pygame.gfxdraw.filled_circle):
+            f(*options)
 
 
 class Go:
