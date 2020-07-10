@@ -116,14 +116,19 @@ class Stone(Graphic):
         for f in (pygame.gfxdraw.aacircle, pygame.gfxdraw.filled_circle):
             f(*options)
 
+    @property
+    def is_free(self):
+        return any(self.liberties.values())
+
 
 class Group:
     def __init__(self, color: Color, *stones: Stone):
         self.color = color
         self.stones = list(stones)
 
-    def __iter__(self):
-        return iter(self.stones)
+    @property
+    def can_capture(self):
+        return all(not stone.is_free for stone in self.stones)
 
     @classmethod
     def merge(cls, groups: List["Group"]):
@@ -138,6 +143,9 @@ class Group:
                 stone.group = new_group
 
         return new_group
+
+    def __iter__(self):
+        return iter(self.stones)
 
 
 class Go:
@@ -172,11 +180,13 @@ class Go:
 
     @property
     def groups(self) -> Dict[Color, Set[Group]]:
-        groups = set()
-        for stone in self.stones.values():
-            groups.add(stone.group)
+        groups = {}
+        for color in Color:
+            groups[color] = set()
+            for stone in self.stones.values():
+                groups[color].add(stone.group)
 
-        return list(groups)
+        return groups
 
     def draw_board(self):
         self.display.fill(BOARD_COLOR)  # Set board color
@@ -234,7 +244,18 @@ class Go:
         Group.merge(merge_groups)
 
         self.update_liberties()
+        self.perform_captures()
         self.toggle_color()
+
+    def perform_captures(self):
+        for color in (
+            self.current_color,
+            Color.WHITE if self.current_color == Color.BLACK else Color.BLACK,
+        ):
+            for group in self.groups[color]:
+                if group.can_capture:
+                    for stone in group:
+                        del self.stones[stone.pos]
 
     def update_liberties(self):
         for stone in self.stones.values():
