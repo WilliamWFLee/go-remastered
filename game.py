@@ -190,7 +190,20 @@ class Go:
             pos, self.current_color, self.square_width, self.stone_radius
         )
         self.stones[pos] = stone
+        self.update_liberties()
         self.toggle_color()
+
+    def update_liberties(self):
+        for stone in self.stones.values():
+            for direction in Direction:
+                adj_stone = stone.pos + direction.value
+                if (
+                    adj_stone <= 2 * (self.board_size,)
+                    and adj_stone not in self.stones
+                ):
+                    stone.liberties[direction] = True
+                else:
+                    stone.liberties[direction] = False
 
     def click(self, pos):
         if pos <= 2 * (self.board_size,) and pos not in self.stones:
