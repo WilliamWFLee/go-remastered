@@ -36,6 +36,11 @@ STAT_SCALE = {
 }
 
 
+class Graphic:
+    def update(self):
+        raise NotImplementedError
+
+
 class Color(Enum):
     BLACK = 0
     WHITE = 1
