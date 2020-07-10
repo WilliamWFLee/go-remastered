@@ -85,6 +85,7 @@ class Stone(Graphic):
     def __init__(self, pos: Position, color: Color):
         self.pos = pos
         self.color = color
+        self.liberties = {direction: True for direction in Direction}
 
 
 class Go:
