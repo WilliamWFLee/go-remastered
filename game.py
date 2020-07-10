@@ -170,18 +170,27 @@ class Go:
                     FG_COLOR,
                 )
 
+    def toggle_color(self):
+        self.current_color = (
+            Color.WHITE if self.current_color == Color.BLACK else Color.BLACK
+        )
+
+    def place_stone(self, pos):
+        stone = Stone(
+            pos, self.current_color, self.square_width, self.stone_radius
+        )
+        self.stones[pos] = stone
+        self.toggle_color()
+
+    def click(self, pos):
+        if pos <= 2 * (self.board_size,) and pos not in self.stones:
+            self.place_stone(pos)
+
     def render(self):
         self.draw_board()
         for stone in self.stones.values():
             stone.update(self.display)
         pygame.display.update()
-
-    def click(self, pos):
-        if pos <= 2 * (self.board_size,) and pos not in self.stones:
-            stone = Stone(
-                pos, self.current_color, self.square_width, self.stone_radius
-            )
-            self.stones[pos] = stone
 
     def run(self):
         pygame.init()
