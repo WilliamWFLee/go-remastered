@@ -74,6 +74,12 @@ class Position(PositionBase):
         return NotImplemented
 
 
+class Stone(Graphic):
+    def __init__(self, pos: Position, color: Color):
+        self.pos = pos
+        self.color = color
+
+
 class Go:
     """
     Class for representing a game of Go
