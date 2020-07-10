@@ -3,7 +3,7 @@
 from collections import namedtuple
 from enum import Enum
 from functools import total_ordering
-from typing import Sequence
+from typing import Sequence, Dict
 
 import pygame
 import pygame.gfxdraw
@@ -80,20 +80,27 @@ class Position(PositionBase):
             return self.x == other[0] and self.y == other[1]
         return NotImplemented
 
+    def __hash__(self):
+        return super().__hash__()
+
 
 class Stone(Graphic):
-    def __init__(self, pos: Position, color: Color):
+    def __init__(
+        self, pos: Position, color: Color, square_width: int, radius: int
+    ):
         self.pos = pos
         self.color = color
+        self.square_width = square_width
+        self.radius = radius
         self.liberties = {direction: True for direction in Direction}
 
-    def update(self, display, square_width, radius):
+    def update(self, display):
         options = (
             display,
-            int((self.pos.x + 0.5) * square_width),
-            int((self.pos.y + 0.5) * square_width),
+            int((self.pos.x + 0.5) * self.square_width),
+            int((self.pos.y + 0.5) * self.square_width),
             self.radius,
-            self.color.value(),
+            self.color.value,
         )
         for f in (pygame.gfxdraw.aacircle, pygame.gfxdraw.filled_circle):
             f(*options)
@@ -127,6 +134,7 @@ class Go:
 
         # Game state
         self.current_color = Color.BLACK
+        self.stones: Dict[Position, Stone] = {}
 
     def draw_board(self):
         self.display.fill(BOARD_COLOUR)  # Set board colour
@@ -164,7 +172,16 @@ class Go:
 
     def render(self):
         self.draw_board()
+        for stone in self.stones.values():
+            stone.update(self.display)
         pygame.display.update()
+
+    def click(self, pos):
+        if pos <= 2 * (self.board_size,) and pos not in self.stones:
+            stone = Stone(
+                pos, self.current_color, self.square_width, self.stone_radius
+            )
+            self.stones[pos] = stone
 
     def run(self):
         pygame.init()
@@ -180,5 +197,9 @@ class Go:
                     pygame.quit()
                     running = False
                     break
+                elif e.type in (MOUSEMOTION, MOUSEBUTTONDOWN):
+                    pos = Position.from_tuple(e.pos, self.square_width)
+                    if e.type == MOUSEBUTTONDOWN:
+                        self.click(pos)
             if running:
                 self.render()
