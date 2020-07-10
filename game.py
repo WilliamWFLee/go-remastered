@@ -189,7 +189,7 @@ class Go:
         # Game state
         self.current_color = Color.BLACK
         self.stones: Dict[Position, Stone] = {}
-        self.highlight = None  # Indicates whose turn it is
+        self.highlight: Ring = None  # Indicates whose turn it is
 
     @property
     def groups(self) -> Dict[Color, Set[Group]]:
@@ -281,14 +281,31 @@ class Go:
                 else:
                     stone.liberties[direction] = False
 
-    def click(self, pos):
-        if pos <= 2 * (self.board_size,) and pos not in self.stones:
-            self.place_stone(pos)
+    def mouse_handler(self, e):
+        pos = Position.from_tuple(e.pos, self.square_width)
+        if (0, 0) <= pos < 2 * (self.board_size,) and pos not in self.stones:
+            if e.type == MOUSEBUTTONDOWN:
+                self.place_stone(pos)
+            elif e.type == MOUSEMOTION:
+                if self.highlight:
+                    self.highlight.pos = pos
+                    self.highlight.color = self.current_color
+                else:
+                    self.highlight = Ring(
+                        pos,
+                        self.current_color,
+                        self.square_width,
+                        self.stone_radius,
+                    )
+        elif e.type == MOUSEMOTION:
+            self.highlight = None
 
     def render(self):
         self.draw_board()
         for stone in self.stones.values():
             stone.update(self.display)
+        if self.highlight is not None:
+            self.highlight.update(self.display)
         pygame.display.update()
 
     def run(self):
@@ -306,8 +323,6 @@ class Go:
                     running = False
                     break
                 elif e.type in (MOUSEMOTION, MOUSEBUTTONDOWN):
-                    pos = Position.from_tuple(e.pos, self.square_width)
-                    if e.type == MOUSEBUTTONDOWN:
-                        self.click(pos)
+                    self.mouse_handler(e)
             if running:
                 self.render()
