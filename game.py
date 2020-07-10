@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+from collections import namedtuple
 from enum import Enum
 from functools import total_ordering
 from typing import Sequence
@@ -40,12 +41,11 @@ class Color(Enum):
     WHITE = 1
 
 
-@total_ordering
-class Position:
-    def __init__(self, x: int, y: int):
-        self.x = x
-        self.y = y
+PositionBase = namedtuple("PositionBase", "x y")
 
+
+@total_ordering
+class Position(PositionBase):
     @classmethod
     def from_mouse_pos(cls, x: int, y: int, square_width: int):
         return cls(x // square_width, y // square_width)
