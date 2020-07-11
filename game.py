@@ -115,6 +115,17 @@ class Ring(Graphic):
     def update(self, display):
         pygame.gfxdraw.aacircle(display, *self._draw_options)
 
+    def __repr__(self):
+        return (
+            f"Ring(pos={self.pos}, color={self.color}, "
+            "square_width={self.square_width}, radius={self.radius})"
+        )
+
+    def __str__(self):
+        return (
+            f"<{type(self).__name__}, color {self.color.name} at {self.pos}>"
+        )
+
 
 class Stone(Ring):
     def __init__(
@@ -131,6 +142,16 @@ class Stone(Ring):
     @property
     def is_free(self):
         return any(self.liberties.values())
+
+    def __repr__(self):
+        return (
+            f"{type(self).__name__}(pos={self.pos}, color={self.color}, "
+            f"square_width={self.square_width}, radius={self.radius}, "
+            f"group={self.group!r}, liberties={self.liberties})"
+        )
+
+    def __str__(self):
+        return f"{type(self).__name__} at {self.pos!r}>"
 
 
 class Group:
@@ -158,6 +179,12 @@ class Group:
 
     def __iter__(self):
         return iter(self.stones)
+
+    def __repr__(self):
+        return f"Group(color={self.color}, stones={self.stones})"
+
+    def __str__(self):
+        return f"Group of {len(self.stones)} stones of color {self.color.name}"
 
 
 class Go:
