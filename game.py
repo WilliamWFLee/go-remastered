@@ -7,7 +7,14 @@ from typing import Dict, List, Sequence, Set
 
 import pygame
 import pygame.gfxdraw
-from pygame.locals import MOUSEBUTTONDOWN, MOUSEMOTION, QUIT
+from pygame.locals import (
+    K_F4,
+    KEYDOWN,
+    KMOD_ALT,
+    MOUSEBUTTONDOWN,
+    MOUSEMOTION,
+    QUIT,
+)
 
 LINE_WIDTH = 2
 BOARD_COLOR = (220, 181, 121)
@@ -346,10 +353,16 @@ class Go:
         while running:
             for e in pygame.event.get():
                 if e.type == QUIT:
-                    pygame.quit()
                     running = False
                     break
+                elif e.type == KEYDOWN:
+                    alt = pygame.key.get_mods() & KMOD_ALT
+                    if e.key == K_F4 and alt:
+                        running = False
+                        break
                 elif e.type in (MOUSEMOTION, MOUSEBUTTONDOWN):
                     self.mouse_handler(e)
             if running:
                 self.render()
+
+        pygame.quit()
