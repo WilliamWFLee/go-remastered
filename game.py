@@ -292,14 +292,14 @@ class Go:
 
         Group.merge(merge_groups)
 
-        # Stores position only
-        # Color is not stored, because it alternates, starting with black
-        self.history += [pos]
-        self.history_position += 1
-
         self.update_liberties()
-        self.perform_captures()
+        captures = self.perform_captures()
         self.toggle_color()
+
+        # Stores position and captures made
+        # Color is not stored, because it alternates, starting with black
+        self.history += [(pos, captures)]
+        self.history_position += 1
 
     def perform_captures(self):
         captures = []
