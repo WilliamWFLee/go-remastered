@@ -224,6 +224,8 @@ class Go:
         self.current_color = Color.BLACK
         self.stones: Dict[Position, Stone] = {}
         self.highlight: Optional[Ring] = None  # Indicates whose turn it is
+        self.history = []
+        self.history_position = 0
 
     @property
     def groups(self) -> Dict[Color, Set[Group]]:
@@ -289,6 +291,11 @@ class Go:
                 merge_groups += [self.stones[adj_pos].group]
 
         Group.merge(merge_groups)
+
+        # Stores position only
+        # Color is not stored, because it alternates, starting with black
+        self.history += [pos]
+        self.history_position += 1
 
         self.update_liberties()
         self.perform_captures()
