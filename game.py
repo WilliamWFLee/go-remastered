@@ -302,6 +302,7 @@ class Go:
         self.toggle_color()
 
     def perform_captures(self):
+        captures = []
         for color in (
             self.current_color,
             Color.WHITE if self.current_color == Color.BLACK else Color.BLACK,
@@ -310,6 +311,9 @@ class Go:
                 if group.can_capture:
                     for stone in group:
                         del self.stones[stone.pos]
+                        captures += [stone.pos]
+
+        return captures
 
     def update_liberties(self):
         for stone in self.stones.values():
