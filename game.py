@@ -194,7 +194,7 @@ class Group:
         return f"Group of {len(self.stones)} stones of color {self.color.name}"
 
 
-HistoryEntry = namedtuple('HistoryEntry', 'pos captures')
+HistoryEntry = namedtuple("HistoryEntry", "pos captures")
 
 
 class Go:
@@ -305,7 +305,7 @@ class Go:
         self.history_position += 1
 
     def perform_captures(self):
-        captures = []
+        captures = {color: [] for color in Color}
         for color in (
             self.current_color,
             Color.WHITE if self.current_color == Color.BLACK else Color.BLACK,
@@ -314,9 +314,12 @@ class Go:
                 if group.can_capture:
                     for stone in group:
                         del self.stones[stone.pos]
-                        captures += [stone.pos]
+                        captures[stone.color] += [stone.pos]
 
-        return captures
+        return {
+            color: tuple(captures[color]) if captures[color] else None
+            for color in Color
+        }
 
     def update_liberties(self):
         for stone in self.stones.values():
