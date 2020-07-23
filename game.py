@@ -194,6 +194,9 @@ class Group:
         return f"Group of {len(self.stones)} stones of color {self.color.name}"
 
 
+HistoryEntry = namedtuple('HistoryEntry', 'pos captures')
+
+
 class Go:
     """
     Class for representing a game of Go
@@ -298,7 +301,7 @@ class Go:
 
         # Stores position and captures made
         # Color is not stored, because it alternates, starting with black
-        self.history += [(pos, captures)]
+        self.history += [HistoryEntry(pos, captures)]
         self.history_position += 1
 
     def perform_captures(self):
