@@ -3,7 +3,7 @@
 from collections import namedtuple
 from enum import Enum
 from functools import total_ordering
-from typing import Dict, List, Sequence, Set
+from typing import Dict, List, Optional, Sequence, Set
 
 import pygame
 import pygame.gfxdraw
@@ -223,7 +223,7 @@ class Go:
         # Game state
         self.current_color = Color.BLACK
         self.stones: Dict[Position, Stone] = {}
-        self.highlight: Ring = None  # Indicates whose turn it is
+        self.highlight: Optional[Ring] = None  # Indicates whose turn it is
 
     @property
     def groups(self) -> Dict[Color, Set[Group]]:
