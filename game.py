@@ -299,8 +299,6 @@ class Go:
                 merge_groups += [self.stones[adj_pos].group]
 
         Group.merge(merge_groups)
-
-        self.update_liberties()
         captures = self.perform_captures()
         self.toggle_color()
 
@@ -324,6 +322,7 @@ class Go:
             self.current_color,
             Color.WHITE if self.current_color == Color.BLACK else Color.BLACK,
         ):
+            self.update_liberties()
             for group in self.groups[color]:
                 if group.can_capture:
                     for stone in group:
