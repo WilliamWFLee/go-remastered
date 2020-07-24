@@ -250,11 +250,9 @@ class Go:
 
     @property
     def groups(self) -> Dict[Color, Set[Group]]:
-        groups = {}
-        for color in Color:
-            groups[color] = set()
-            for stone in self.stones.values():
-                groups[color].add(stone.group)
+        groups = {color: set() for color in Color}
+        for stone in self.stones.values():
+            groups[stone.color].add(stone.group)
 
         return groups
 
