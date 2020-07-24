@@ -351,7 +351,9 @@ class Go:
 
     def mouse_handler(self, e):
         pos = Position.from_tuple(e.pos, self.square_width)
-        if (0, 0) <= pos < 2 * (self.board_size,) and pos not in self.stones:
+        if (0, 0) <= pos <= 2 * (
+            self.board_size - 1,
+        ) and pos not in self.stones:
             if e.type == MOUSEBUTTONDOWN and e.button == 1:
                 self.place_stone(pos)
             elif e.type == MOUSEMOTION:
