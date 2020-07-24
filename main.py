@@ -12,8 +12,9 @@ def main():
     config_dialog = ConfigDialog()
     config = config_dialog.get_config()
 
-    game = Go(**config._asdict())
-    game.run()
+    if config is not None:
+        game = Go(**config._asdict())
+        game.run()
 
 
 main()

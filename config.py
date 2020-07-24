@@ -23,6 +23,7 @@ class ConfigDialog:
         self._root = Tk()
         self._root.title("Go Launcher")
         self._root.resizable(False, False)
+        self._root.protocol("WM_DELETE_WINDOW", self.on_close)
 
         # Board size input box
         self._size_label = Label(
@@ -44,6 +45,10 @@ class ConfigDialog:
         )
         self._go_button.grid(row=2, column=0, columnspan=2, **PADDING)
         self._root.bind("<Return>", lambda e: self.set_config())
+
+    def on_close(self) -> None:
+        self.config = None
+        self._root.destroy()
 
     def set_config(self) -> None:
         self._size_label.config(fg="#000")
