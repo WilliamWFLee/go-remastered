@@ -283,7 +283,7 @@ class Go:
             Color.WHITE if self.current_color == Color.BLACK else Color.BLACK
         )
 
-    def place_stone(self, pos):
+    def place_stone(self, pos, *, redo=False):
         new_stone = Stone(
             pos, self.current_color, self.square_width, self.stone_radius
         )
@@ -303,11 +303,13 @@ class Go:
         captures = self.perform_captures()
         self.toggle_color()
 
-        # Truncates history for undos
-        self.history = self.history[: self.history_position]
-        # Stores position and captures made
-        # Color is not stored, because it alternates, starting with black
-        self.history += [HistoryEntry(pos, captures)]
+        if not redo:
+            # Truncates history for undos
+            self.history = self.history[: self.history_position]
+            # Stores position and captures made
+            # Color is not stored, because it alternates, starting with black
+            self.history += [HistoryEntry(pos, captures)]
+
         self.history_position += 1
 
     def perform_captures(self):
@@ -374,17 +376,9 @@ class Go:
 
     def redo(self):
         if self.history_position < len(self.history):
-            history_entry = self.history[self.history_position]
-            new_stone = Stone(
-                history_entry.pos,
-                self.current_color,
-                self.square_width,
-                self.stone_radius,
+            self.place_stone(
+                self.history[self.history_position].pos, redo=True
             )
-            self.stones[history_entry.pos] = new_stone
-            self.toggle_color()
-
-            self.history_position += 1
 
     def render(self):
         self.draw_board()
