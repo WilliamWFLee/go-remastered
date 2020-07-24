@@ -228,10 +228,7 @@ class Go:
         self.stone_radius = int(STONE_RADIUS_SCALE * self.square_width)
         self.board_width = self.board_size * self.square_width
 
-        self.screen_dimensions = (
-            self.board_width + self.square_width // 2,
-            self.board_width,
-        )
+        self.screen_dimensions = 2 * (self.board_width,)
 
         # Game state
         self.current_color = Color.BLACK
