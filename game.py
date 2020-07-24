@@ -28,8 +28,8 @@ DEFAULT_COLORS = [
     (255, 255, 255),
 ]
 FG_COLOR = (0, 0, 0)
-KEY_REPEAT_DELAY = 300
-KEY_REPEAT_INTERVAL = 5
+KEY_REPEAT_DELAY = 500
+KEY_REPEAT_INTERVAL = 50
 BOARD_SIZES = (9, 13, 19)
 HOSHI_POSITIONS = {
     9: [(x, y) for x in (2, 6) for y in (2, 6)] + [(4, 4)],
