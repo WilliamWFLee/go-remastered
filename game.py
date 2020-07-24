@@ -77,9 +77,9 @@ class Position(PositionBase):
 
     def __lt__(self, other):
         if isinstance(other, type(self)):
-            return self.x < other.x and self.y < other.y
+            return not (self.x > other.x or self.y > other.y)
         elif isinstance(other, tuple):
-            return self.x < other[0] and self.y < other[1]
+            return not (self.x > other[0] or self.y > other[1])
         return NotImplemented
 
     def __le__(self, other):
@@ -87,9 +87,9 @@ class Position(PositionBase):
 
     def __gt__(self, other):
         if isinstance(other, type(self)):
-            return self.x > other.x and self.y > other.y
+            return not (self.x < other.x or self.y < other.y)
         elif isinstance(other, tuple):
-            return self.x > other[0] and self.y > other[1]
+            return not (self.x < other[0] or self.y < other[1])
         return NotImplemented
 
     def __ge__(self, other):
