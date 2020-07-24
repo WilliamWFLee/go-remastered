@@ -198,7 +198,7 @@ class Group:
         return new_group
 
     def __iter__(self):
-        return iter(self.stones)
+        return iter(self.stones[:])
 
     def __repr__(self):
         return f"Group(color={self.color}, stones={self.stones})"
