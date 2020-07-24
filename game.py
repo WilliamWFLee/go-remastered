@@ -2,7 +2,6 @@
 
 from collections import namedtuple
 from enum import Enum
-from functools import total_ordering
 from typing import Dict, List, Optional, Sequence, Set
 
 import pygame
@@ -67,7 +66,6 @@ class Direction(Enum):
 PositionBase = namedtuple("PositionBase", "x y")
 
 
-@total_ordering
 class Position(PositionBase):
     @classmethod
     def from_mouse_pos(cls, x: int, y: int, square_width: int):
@@ -84,12 +82,28 @@ class Position(PositionBase):
             return self.x < other[0] and self.y < other[1]
         return NotImplemented
 
+    def __le__(self, other):
+        return self < other or self == other
+
+    def __gt__(self, other):
+        if isinstance(other, type(self)):
+            return self.x > other.x and self.y > other.y
+        elif isinstance(other, tuple):
+            return self.x > other[0] and self.y > other[1]
+        return NotImplemented
+
+    def __ge__(self, other):
+        return self > other or self == other
+
     def __eq__(self, other):
         if isinstance(other, type(self)):
             return self.x == other.x and self.y == other.y
         elif isinstance(other, tuple):
             return self.x == other[0] and self.y == other[1]
         return NotImplemented
+
+    def __ne__(self, other):
+        return not self == other
 
     def __add__(self, other):
         if isinstance(other, type(self)):
