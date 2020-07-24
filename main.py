@@ -5,7 +5,8 @@ Copyright (c) 2020 William Lee
 """
 
 from config import ConfigDialog
-from game import Go
+from models import GameState
+from ui import UI
 
 
 def main():
@@ -13,8 +14,9 @@ def main():
     config = config_dialog.get_config()
 
     if config is not None:
-        game = Go(**config._asdict())
-        game.run()
+        game_state = GameState(config.board_size)
+        ui = UI(game_state, config.square_width)
+        ui.run()
 
 
 main()

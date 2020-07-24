@@ -2,48 +2,9 @@
 
 from collections import namedtuple
 from enum import Enum
-from typing import Dict, List, Optional, Sequence, Set
+from typing import Dict, List, Optional, Set
 
-import pygame
-import pygame.gfxdraw
-from pygame.locals import (
-    K_F4,
-    KEYDOWN,
-    KMOD_ALT,
-    KMOD_CTRL,
-    KMOD_SHIFT,
-    MOUSEBUTTONDOWN,
-    MOUSEMOTION,
-    QUIT,
-    K_y,
-    K_z,
-)
-
-LINE_WIDTH = 2
-BOARD_COLOR = (220, 181, 121)
 DEFAULT_BOARD_SIZE = 19
-DEFAULT_SQUARE_WIDTH = 50
-DEFAULT_COLORS = [
-    (0, 0, 0),
-    (255, 255, 255),
-]
-FG_COLOR = (0, 0, 0)
-KEY_REPEAT_DELAY = 500
-KEY_REPEAT_INTERVAL = 50
-BOARD_SIZES = (9, 13, 19)
-HOSHI_POSITIONS = {
-    9: [(x, y) for x in (2, 6) for y in (2, 6)] + [(4, 4)],
-    13: [(x, y) for x in (3, 6, 9) for y in (3, 6, 9)],
-    19: [(x, y) for x in (3, 9, 15) for y in (3, 9, 15)],
-}
-
-HOSHI_RADIUS_SCALE = 0.08
-STONE_RADIUS_SCALE = 0.46
-
-
-class Graphic:
-    def update(self, display):
-        raise NotImplementedError
 
 
 class Color(Enum):
@@ -62,14 +23,6 @@ PositionBase = namedtuple("PositionBase", "x y")
 
 
 class Position(PositionBase):
-    @classmethod
-    def from_mouse_pos(cls, x: int, y: int, square_width: int):
-        return cls(x // square_width, y // square_width)
-
-    @classmethod
-    def from_tuple(cls, pos: Sequence[int], square_width: int):
-        return cls.from_mouse_pos(*pos, square_width)
-
     def __lt__(self, other):
         if isinstance(other, type(self)):
             return not (self.x > other.x or self.y > other.y)
@@ -114,32 +67,13 @@ class Position(PositionBase):
         return super().__hash__()
 
 
-class Ring(Graphic):
-    def __init__(
-        self, pos: Position, color: Color, square_width: int, radius: int
-    ):
+class Ring:
+    def __init__(self, pos: Position, color: Color):
         self.pos = pos
         self.color = color
-        self.square_width = square_width
-        self.radius = radius
-
-    @property
-    def _draw_options(self):
-        return (
-            int((self.pos.x + 0.5) * self.square_width),
-            int((self.pos.y + 0.5) * self.square_width),
-            self.radius,
-            self.color.value,
-        )
-
-    def update(self, display):
-        pygame.gfxdraw.aacircle(display, *self._draw_options)
 
     def __repr__(self):
-        return (
-            f"Ring(pos={self.pos}, color={self.color}, "
-            "square_width={self.square_width}, radius={self.radius})"
-        )
+        return f"Ring(pos={self.pos}, color={self.color})"
 
     def __str__(self):
         return (
@@ -148,16 +82,10 @@ class Ring(Graphic):
 
 
 class Stone(Ring):
-    def __init__(
-        self, pos: Position, color: Color, square_width: int, radius: int
-    ):
-        super().__init__(pos, color, square_width, radius)
+    def __init__(self, pos: Position, color: Color):
+        super().__init__(pos, color)
         self.group = Group(color, self)
         self.liberties = {direction: True for direction in Direction}
-
-    def update(self, display):
-        super().update(display)
-        pygame.gfxdraw.filled_circle(display, *self._draw_options)
 
     @property
     def is_free(self):
@@ -166,7 +94,6 @@ class Stone(Ring):
     def __repr__(self):
         return (
             f"{type(self).__name__}(pos={self.pos}, color={self.color}, "
-            f"square_width={self.square_width}, radius={self.radius}, "
             f"group={self.group!r}, liberties={self.liberties})"
         )
 
@@ -210,32 +137,20 @@ class Group:
 HistoryEntry = namedtuple("HistoryEntry", "pos captures")
 
 
-class Go:
+class GameState:
     """
     Class for representing a game of Go
     """
 
-    def __init__(self, board_size: int = None, square_width: int = None):
-        # Game dimensions
-        self.board_size = (
-            board_size if board_size is not None else DEFAULT_BOARD_SIZE
-        )
-        self.square_width = (
-            square_width if square_width is not None else DEFAULT_SQUARE_WIDTH
-        )
-
-        self.hoshi_radius = int(HOSHI_RADIUS_SCALE * self.square_width)
-        self.stone_radius = int(STONE_RADIUS_SCALE * self.square_width)
-        self.board_width = self.board_size * self.square_width
-
-        self.screen_dimensions = 2 * (self.board_width,)
-
+    def __init__(self, board_size: Optional[int] = None):
         # Game state
         self.current_color = Color.BLACK
         self.stones: Dict[Position, Stone] = {}
-        self.highlight: Optional[Ring] = None  # Indicates whose turn it is
         self.history = []
         self.history_position = 0
+        self.board_size = (
+            board_size if board_size is not None else DEFAULT_BOARD_SIZE
+        )
 
     @property
     def groups(self) -> Dict[Color, Set[Group]]:
@@ -245,49 +160,13 @@ class Go:
 
         return groups
 
-    def draw_board(self):
-        self.display.fill(BOARD_COLOR)  # Set board color
-        for x in range(self.board_size):  # Draws lines
-            start = (
-                int((x + 0.5) * self.square_width),
-                self.square_width // 2,
-            )
-            end = (
-                int((x + 0.5) * self.square_width),
-                self.board_width - self.square_width // 2,
-            )
-            pygame.draw.line(self.display, FG_COLOR, start, end, LINE_WIDTH)
-        for y in range(self.board_size):
-            start = (
-                self.square_width // 2,
-                int((y + 0.5) * self.square_width),
-            )
-            end = (
-                self.board_width - self.square_width // 2,
-                int((y + 0.5) * self.square_width),
-            )
-            pygame.draw.line(self.display, FG_COLOR, start, end, LINE_WIDTH)
-
-        # Draws hoshi positions
-        for x, y in HOSHI_POSITIONS[self.board_size]:
-            for f in (pygame.gfxdraw.filled_circle, pygame.gfxdraw.aacircle):
-                f(
-                    self.display,
-                    int((x + 0.5) * self.square_width),
-                    int((y + 0.5) * self.square_width),
-                    self.hoshi_radius,
-                    FG_COLOR,
-                )
-
     def toggle_color(self):
         self.current_color = (
             Color.WHITE if self.current_color == Color.BLACK else Color.BLACK
         )
 
     def place_stone(self, pos, *, redo=False):
-        new_stone = Stone(
-            pos, self.current_color, self.square_width, self.stone_radius
-        )
+        new_stone = Stone(pos, self.current_color)
         self.stones[pos] = new_stone
         merge_groups = [new_stone.group]
         for direction in Direction:
@@ -345,27 +224,6 @@ class Go:
                 else:
                     stone.liberties[direction] = False
 
-    def mouse_handler(self, e):
-        pos = Position.from_tuple(e.pos, self.square_width)
-        if (0, 0) <= pos <= 2 * (
-            self.board_size - 1,
-        ) and pos not in self.stones:
-            if e.type == MOUSEBUTTONDOWN and e.button == 1:
-                self.place_stone(pos)
-            elif e.type == MOUSEMOTION:
-                if self.highlight:
-                    self.highlight.pos = pos
-                    self.highlight.color = self.current_color
-                else:
-                    self.highlight = Ring(
-                        pos,
-                        self.current_color,
-                        self.square_width,
-                        self.stone_radius,
-                    )
-        elif e.type == MOUSEMOTION:
-            self.highlight = None
-
     def undo(self):
         if self.history_position > 0:
             self.history_position -= 1
@@ -374,9 +232,7 @@ class Go:
             for color, positions in history_entry.captures.items():
                 if positions is not None:
                     for pos in positions:
-                        new_stone = Stone(
-                            pos, color, self.square_width, self.stone_radius
-                        )
+                        new_stone = Stone(pos, color)
                         self.stones[pos] = new_stone
 
             self.remove_stone(history_entry.pos)
@@ -387,47 +243,3 @@ class Go:
             self.place_stone(
                 self.history[self.history_position].pos, redo=True
             )
-
-    def render(self):
-        self.draw_board()
-        for stone in self.stones.values():
-            stone.update(self.display)
-        if self.highlight is not None:
-            self.highlight.update(self.display)
-        pygame.display.update()
-
-    def run(self):
-        pygame.init()
-        pygame.display.set_caption("Go")
-        pygame.key.set_repeat(KEY_REPEAT_DELAY, KEY_REPEAT_INTERVAL)
-
-        self.display = pygame.display.set_mode(self.screen_dimensions)
-
-        running = True
-        while running:
-            for e in pygame.event.get():
-                if e.type == QUIT:
-                    running = False
-                    break
-                elif e.type == KEYDOWN:
-                    ctrl, shift, alt = (
-                        pygame.key.get_mods() & key
-                        for key in (KMOD_CTRL, KMOD_SHIFT, KMOD_ALT)
-                    )
-                    if e.key == K_F4 and alt:
-                        running = False
-                        break
-                    if ctrl:
-                        if e.key == K_y:
-                            self.redo()
-                        if e.key == K_z:
-                            if shift:
-                                self.redo()
-                            else:
-                                self.undo()
-                elif e.type in (MOUSEMOTION, MOUSEBUTTONDOWN):
-                    self.mouse_handler(e)
-            if running:
-                self.render()
-
-        pygame.quit()
