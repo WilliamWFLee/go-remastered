@@ -324,6 +324,11 @@ class Go:
 
         self.history_position += 1
 
+    def remove_stone(self, pos):
+        stone = self.stones[pos]
+        del self.stones[pos]
+        stone.group.stones.remove(stone)
+
     def perform_captures(self):
         captures = {color: [] for color in Color}
         for color in (
@@ -333,7 +338,7 @@ class Go:
             for group in self.groups[color]:
                 if group.can_capture:
                     for stone in group:
-                        del self.stones[stone.pos]
+                        self.remove_stone(stone.pos)
                         captures[stone.color] += [stone.pos]
 
         return {
@@ -383,7 +388,8 @@ class Go:
                             pos, color, self.square_width, self.stone_radius
                         )
                         self.stones[pos] = new_stone
-            del self.stones[history_entry.pos]
+
+            self.remove_stone(history_entry.pos)
             self.toggle_color()
 
     def redo(self):
