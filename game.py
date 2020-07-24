@@ -9,13 +9,15 @@ import pygame
 import pygame.gfxdraw
 from pygame.locals import (
     K_F4,
-    K_z,
     KEYDOWN,
     KMOD_ALT,
     KMOD_CTRL,
+    KMOD_SHIFT,
     MOUSEBUTTONDOWN,
     MOUSEMOTION,
     QUIT,
+    K_y,
+    K_z,
 )
 
 LINE_WIDTH = 2
@@ -370,6 +372,20 @@ class Go:
             del self.stones[history_entry.pos]
             self.toggle_color()
 
+    def redo(self):
+        if self.history_position < len(self.history):
+            history_entry = self.history[self.history_position]
+            new_stone = Stone(
+                history_entry.pos,
+                self.current_color,
+                self.square_width,
+                self.stone_radius,
+            )
+            self.stones[history_entry.pos] = new_stone
+            self.toggle_color()
+
+            self.history_position += 1
+
     def render(self):
         self.draw_board()
         for stone in self.stones.values():
@@ -392,15 +408,21 @@ class Go:
                     running = False
                     break
                 elif e.type == KEYDOWN:
-                    ctrl, alt = (
+                    ctrl, shift, alt = (
                         pygame.key.get_mods() & key
-                        for key in (KMOD_CTRL, KMOD_ALT)
+                        for key in (KMOD_CTRL, KMOD_SHIFT, KMOD_ALT)
                     )
                     if e.key == K_F4 and alt:
                         running = False
                         break
-                    if e.key == K_z and ctrl:
-                        self.undo()
+                    if ctrl:
+                        if e.key == K_y:
+                            self.redo()
+                        if e.key == K_z:
+                            if shift:
+                                self.redo()
+                            else:
+                                self.undo()
                 elif e.type in (MOUSEMOTION, MOUSEBUTTONDOWN):
                     self.mouse_handler(e)
             if running:
