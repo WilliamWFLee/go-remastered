@@ -319,8 +319,8 @@ class Go:
     def perform_captures(self):
         captures = {color: [] for color in Color}
         for color in (
-            self.current_color,
             Color.WHITE if self.current_color == Color.BLACK else Color.BLACK,
+            self.current_color,
         ):
             self.update_liberties()
             for group in self.groups[color]:
