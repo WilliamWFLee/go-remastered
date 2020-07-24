@@ -351,7 +351,7 @@ class Go:
             for direction in Direction:
                 adj_pos = stone.pos + direction.value
                 if (0, 0) <= adj_pos <= 2 * (
-                    self.board_size,
+                    self.board_size - 1,
                 ) and adj_pos not in self.stones:
                     stone.liberties[direction] = True
                 else:
