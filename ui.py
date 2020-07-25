@@ -12,12 +12,9 @@ from pygame.locals import (
     KEYDOWN,
     KMOD_ALT,
     KMOD_CTRL,
-    KMOD_SHIFT,
     MOUSEBUTTONDOWN,
     MOUSEMOTION,
     QUIT,
-    K_y,
-    K_z,
 )
 
 from models import Color, GameState, Position, Ring, Stone
@@ -45,8 +42,6 @@ STONE_RADIUS_SCALE = 0.46
 
 class EventType(Enum):
     PLACE_STONE = auto()
-    UNDO = auto()
-    REDO = auto()
 
 
 class Event:
@@ -165,21 +160,13 @@ class UI:
                     running = False
                     break
                 elif e.type == KEYDOWN:
-                    ctrl, shift, alt = (
+                    ctrl, alt = (
                         pygame.key.get_mods() & key
-                        for key in (KMOD_CTRL, KMOD_SHIFT, KMOD_ALT)
+                        for key in (KMOD_CTRL, KMOD_ALT)
                     )
                     if e.key == K_F4 and alt:
                         running = False
                         break
-                    if ctrl:
-                        if e.key == K_y:
-                            self.game_state.redo()
-                        if e.key == K_z:
-                            if shift:
-                                self.game_state.redo()
-                            else:
-                                self.game_state.undo()
                 elif e.type in (MOUSEMOTION, MOUSEBUTTONDOWN):
                     await self.mouse_handler(e)
             if running:

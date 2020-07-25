@@ -165,7 +165,7 @@ class GameState:
             Color.WHITE if self.current_color == Color.BLACK else Color.BLACK
         )
 
-    def place_stone(self, pos, *, redo=False):
+    def place_stone(self, pos):
         new_stone = Stone(pos, self.current_color)
         self.stones[pos] = new_stone
         merge_groups = [new_stone.group]
@@ -181,12 +181,11 @@ class GameState:
         captures = self.perform_captures()
         self.toggle_color()
 
-        if not redo:
-            # Truncates history for undos
-            self.history = self.history[: self.history_position]
-            # Stores position and captures made
-            # Color is not stored, because it alternates, starting with black
-            self.history += [HistoryEntry(pos, captures)]
+        # Truncates history for undos
+        self.history = self.history[: self.history_position]
+        # Stores position and captures made
+        # Color is not stored, because it alternates, starting with black
+        self.history += [HistoryEntry(pos, captures)]
 
         self.history_position += 1
 
@@ -223,23 +222,3 @@ class GameState:
                     stone.liberties[direction] = True
                 else:
                     stone.liberties[direction] = False
-
-    def undo(self):
-        if self.history_position > 0:
-            self.history_position -= 1
-
-            history_entry = self.history[self.history_position]
-            for color, positions in history_entry.captures.items():
-                if positions is not None:
-                    for pos in positions:
-                        new_stone = Stone(pos, color)
-                        self.stones[pos] = new_stone
-
-            self.remove_stone(history_entry.pos)
-            self.toggle_color()
-
-    def redo(self):
-        if self.history_position < len(self.history):
-            self.place_stone(
-                self.history[self.history_position].pos, redo=True
-            )
