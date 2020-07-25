@@ -4,19 +4,22 @@ A graphical version of the board game Go
 Copyright (c) 2020 William Lee
 """
 
+import asyncio
+
 from config import ConfigDialog
 from models import GameState
 from ui import UI
 
 
-def main():
+async def main():
     config_dialog = ConfigDialog()
     config = config_dialog.get_config()
 
     if config is not None:
         game_state = GameState(config.board_size)
         ui = UI(game_state, config.square_width)
-        ui.run()
+        await ui.run()
 
 
-main()
+if __name__ == "__main__":
+    asyncio.run(main())

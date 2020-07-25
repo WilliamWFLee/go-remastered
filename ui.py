@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+import asyncio
+import concurrent.futures
 from typing import Optional
 
 import pygame
@@ -57,7 +59,10 @@ class UI:
         self.screen_dimensions = 2 * (self.board_width,)
         self.highlight: Optional[Ring] = None  # Indicates whose turn it is
 
-    def mouse_handler(self, e):
+        self._loop = asyncio.get_running_loop()
+        self._pool = concurrent.futures.ThreadPoolExecutor()
+
+    async def mouse_handler(self, e):
         pos = Position(*[coord // self.square_width for coord in e.pos])
         if (0, 0) <= pos <= 2 * (
             self.game_state.board_size - 1,
@@ -123,15 +128,16 @@ class UI:
         self._draw_ring(stone)
         pygame.gfxdraw.filled_circle(*self._get_ring_draw_options(stone))
 
-    def render(self):
+    async def render(self):
         self._draw_board()
         for stone in self.game_state.stones.values():
             self._draw_stone(stone)
         if self.highlight is not None:
             self._draw_ring(self.highlight)
-        pygame.display.update()
 
-    def run(self):
+        await self._loop.run_in_executor(self._pool, pygame.display.update)
+
+    async def run(self):
         pygame.init()
         pygame.display.set_caption("Go")
         pygame.key.set_repeat(KEY_REPEAT_DELAY, KEY_REPEAT_INTERVAL)
@@ -163,6 +169,6 @@ class UI:
                 elif e.type in (MOUSEMOTION, MOUSEBUTTONDOWN):
                     self.mouse_handler(e)
             if running:
-                self.render()
+                await self.render()
 
         pygame.quit()
