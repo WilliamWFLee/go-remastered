@@ -48,6 +48,9 @@ class Event:
     def __init__(self, type_: EventType, **attrs):
         self.type = type_
 
+        if type_ == EventType.PLACE_STONE:
+            self.pos = attrs["pos"]
+
 
 class UI:
     def __init__(
@@ -77,7 +80,7 @@ class UI:
             self.game_state.board_size - 1,
         ) and pos not in self.game_state.stones:
             if e.type == MOUSEBUTTONDOWN and e.button == 1:
-                self.game_state.place_stone(pos)
+                await self._send(EventType.PLACE_STONE, pos=pos)
             elif e.type == MOUSEMOTION:
                 if self.highlight:
                     self.highlight.pos = pos
@@ -137,6 +140,10 @@ class UI:
         self._draw_ring(stone)
         pygame.gfxdraw.filled_circle(*self._get_ring_draw_options(stone))
 
+    async def _send(self, event_type, **attrs):
+        event = Event(event_type, **attrs)
+        await self._outgoing_event_q.put(event)
+
     async def render(self):
         self._draw_board()
         for stone in self.game_state.stones.values():
@@ -170,6 +177,7 @@ class UI:
                 elif e.type in (MOUSEMOTION, MOUSEBUTTONDOWN):
                     await self.mouse_handler(e)
             if running:
+                await self._outgoing_event_q.join()
                 await self.render()
 
         pygame.quit()

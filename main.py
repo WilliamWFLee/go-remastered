@@ -6,19 +6,12 @@ Copyright (c) 2020 William Lee
 
 import asyncio
 
-from config import ConfigDialog
-from models import GameState
-from ui import UI
+from client import Client
 
 
 async def main():
-    config_dialog = ConfigDialog()
-    config = config_dialog.get_config()
-
-    if config is not None:
-        game_state = GameState(config.board_size)
-        ui = UI(game_state, config.square_width)
-        await ui.run()
+    client = Client()
+    await client.run()
 
 
 if __name__ == "__main__":
