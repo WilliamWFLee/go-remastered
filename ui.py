@@ -40,11 +40,6 @@ HOSHI_RADIUS_SCALE = 0.08
 STONE_RADIUS_SCALE = 0.46
 
 
-class Graphic:
-    def update(self, display):
-        raise NotImplementedError
-
-
 class UI:
     def __init__(
         self, game_state: GameState, square_width: Optional[int] = None,
