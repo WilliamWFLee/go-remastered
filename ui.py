@@ -2,6 +2,7 @@
 
 import asyncio
 import concurrent.futures
+from enum import Enum, auto
 from typing import Optional
 
 import pygame
@@ -42,9 +43,20 @@ HOSHI_RADIUS_SCALE = 0.08
 STONE_RADIUS_SCALE = 0.46
 
 
+class EventType(Enum):
+    PLACE_STONE = auto()
+    UNDO = auto()
+    REDO = auto()
+
+
+class Event:
+    def __init__(self, type_: EventType, **attrs):
+        self.type = type_
+
+
 class UI:
     def __init__(
-        self, game_state: GameState, square_width: Optional[int] = None,
+        self, game_state: GameState, square_width: Optional[int] = None
     ):
         self.game_state = game_state
         # Game dimensions
@@ -58,6 +70,8 @@ class UI:
 
         self.screen_dimensions = 2 * (self.board_width,)
         self.highlight: Optional[Ring] = None  # Indicates whose turn it is
+
+        self._outgoing_event_q = asyncio.Queue()
 
         self._loop = asyncio.get_running_loop()
         self._pool = concurrent.futures.ThreadPoolExecutor()
