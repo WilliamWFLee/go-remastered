@@ -167,7 +167,7 @@ class UI:
                             else:
                                 self.game_state.undo()
                 elif e.type in (MOUSEMOTION, MOUSEBUTTONDOWN):
-                    self.mouse_handler(e)
+                    await self.mouse_handler(e)
             if running:
                 await self.render()
 
