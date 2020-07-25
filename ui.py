@@ -19,15 +19,15 @@ from pygame.locals import (
     K_z,
 )
 
-from models import GameState, Position, Ring, Stone
+from models import Color, GameState, Position, Ring, Stone
 
 LINE_WIDTH = 2
 BOARD_COLOR = (220, 181, 121)
 DEFAULT_SQUARE_WIDTH = 50
-DEFAULT_COLORS = [
-    (0, 0, 0),
-    (255, 255, 255),
-]
+DEFAULT_COLORS = {
+    Color.BLACK: (0, 0, 0),
+    Color.WHITE: (255, 255, 255),
+}
 FG_COLOR = (0, 0, 0)
 KEY_REPEAT_DELAY = 500
 KEY_REPEAT_INTERVAL = 50
@@ -118,7 +118,7 @@ class UI:
             int((ring.pos.x + 0.5) * self.square_width),
             int((ring.pos.y + 0.5) * self.square_width),
             self.stone_radius,
-            ring.color.value,
+            DEFAULT_COLORS[ring.color],
         )
 
     def _draw_ring(self, ring: Ring):
