@@ -14,7 +14,7 @@ PADDING = {
 Config = namedtuple("Config", "board_size square_width")
 
 
-class ConfigDialog:
+class Launcher:
     """
     Dialog for getting game config from user
     """

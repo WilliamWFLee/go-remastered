@@ -2,7 +2,7 @@
 
 import asyncio
 
-from .config import ConfigDialog
+from .launcher import Launcher
 from .models import GameState
 from .networking import ClientServerBase, ConnectionBase
 from .ui import UI, EventType
@@ -23,8 +23,8 @@ class Client(ClientServerBase):
     def __init__(self, host=None, port=None, timeout=None):
         super().__init__(host=host if host else DEFAULT_HOST, port=port)
 
-        config_dialog = ConfigDialog()
-        self.config = config_dialog.get_config()
+        launcher = Launcher()
+        self.config = launcher.get_config()
         self.game_state = GameState(self.config.board_size)
         self.ui = UI(self.game_state, self.config.square_width)
 
