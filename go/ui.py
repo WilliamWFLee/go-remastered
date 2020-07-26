@@ -156,7 +156,10 @@ class UI:
 
     async def render(self):
         self.display.fill(BOARD_COLOR)  # Set board color
-        board_surface = pygame.Surface(2 * (self.board_width,), flags=SRCALPHA)
+
+        board_surface = pygame.Surface(2 * (self.board_width,))
+        board_surface.fill(BOARD_COLOR)
+
         self._draw_board(board_surface)
         for stone in self.game_state.stones.values():
             self._draw_stone(board_surface, stone)
