@@ -2,7 +2,7 @@
 
 import asyncio
 
-from networking import ClientServerBase, ConnectionBase
+from .networking import ClientServerBase, ConnectionBase
 
 
 DEFAULT_HOST = "0.0.0.0"

@@ -2,10 +2,10 @@
 
 import asyncio
 
-from config import ConfigDialog
-from models import GameState
-from networking import ClientServerBase, ConnectionBase
-from ui import UI, EventType
+from .config import ConfigDialog
+from .models import GameState
+from .networking import ClientServerBase, ConnectionBase
+from .ui import UI, EventType
 
 
 DEFAULT_HOST = "127.0.0.1"

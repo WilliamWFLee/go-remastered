@@ -17,7 +17,7 @@ from pygame.locals import (
     QUIT,
 )
 
-from models import Color, GameState, Position, Ring, Stone
+from .models import Color, GameState, Position, Ring, Stone
 
 LINE_WIDTH = 2
 BOARD_COLOR = (220, 181, 121)

@@ -6,7 +6,7 @@ Copyright (c) 2020 William Lee
 
 import asyncio
 
-from client import Client
+from go.client import Client
 
 
 async def main():
