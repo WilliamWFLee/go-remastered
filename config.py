@@ -26,9 +26,7 @@ class ConfigDialog:
         self._root.protocol("WM_DELETE_WINDOW", self.on_close)
 
         # Board size input box
-        self._size_label = Label(
-            self._root, text="Board Size (9, 13, or [19])"
-        )
+        self._size_label = Label(self._root, text="Board Size (9, 13, or [19])")
         self._size_label.grid(row=0, column=0, sticky=W, **PADDING)
         self._size_entry = Entry(self._root)
         self._size_entry.grid(row=0, column=1, **PADDING)
@@ -87,8 +85,7 @@ class ConfigDialog:
             messagebox.showwarning(
                 title="Warning",
                 message=(
-                    f"Chosen square width ({square_width}) "
-                    "may make text unreadable"
+                    f"Chosen square width ({square_width}) " "may make text unreadable"
                 ),
             )
         elif square_width < 10:

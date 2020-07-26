@@ -76,9 +76,7 @@ class Ring:
         return f"Ring(pos={self.pos}, color={self.color})"
 
     def __str__(self):
-        return (
-            f"<{type(self).__name__}, color {self.color.name} at {self.pos}>"
-        )
+        return f"<{type(self).__name__}, color {self.color.name} at {self.pos}>"
 
 
 class Stone(Ring):
@@ -148,9 +146,7 @@ class GameState:
         self.stones: Dict[Position, Stone] = {}
         self.history = []
         self.history_position = 0
-        self.board_size = (
-            board_size if board_size is not None else DEFAULT_BOARD_SIZE
-        )
+        self.board_size = board_size if board_size is not None else DEFAULT_BOARD_SIZE
 
     @property
     def groups(self) -> Dict[Color, Set[Group]]:
@@ -171,10 +167,7 @@ class GameState:
         merge_groups = [new_stone.group]
         for direction in Direction:
             adj_pos = new_stone.pos + direction.value
-            if (
-                adj_pos in self.stones
-                and self.stones[adj_pos].color == new_stone.color
-            ):
+            if adj_pos in self.stones and self.stones[adj_pos].color == new_stone.color:
                 merge_groups += [self.stones[adj_pos].group]
 
         Group.merge(merge_groups)
