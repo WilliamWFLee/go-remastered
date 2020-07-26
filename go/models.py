@@ -215,3 +215,9 @@ class GameState:
                     stone.liberties[direction] = True
                 else:
                     stone.liberties[direction] = False
+
+
+class ClientState:
+    def __init__(self, color: Color):
+        self.color = color
+        self.stones: Dict[Position, Stone] = {}
