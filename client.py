@@ -8,11 +8,16 @@ from ui import UI, EventType
 
 
 class Client:
-    def __init__(self):
+    def __init__(self, timeout=None):
         config_dialog = ConfigDialog()
         self.config = config_dialog.get_config()
         self.game_state = GameState(self.config.board_size)
         self.ui = UI(self.game_state, self.config.square_width)
+
+        self.timeout = timeout
+
+    async def _connect(self, host: str, port: int):
+        self._reader, self._writer = await asyncio.open_connection(host, port)
 
     async def _event_worker(self):
         while True:
