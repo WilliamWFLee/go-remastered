@@ -15,6 +15,7 @@ from pygame.locals import (
     MOUSEBUTTONDOWN,
     MOUSEMOTION,
     QUIT,
+    SRCALPHA,
     VIDEORESIZE,
 )
 
@@ -84,6 +85,8 @@ class UI:
 
     def _draw_board(self):
         self.display.fill(BOARD_COLOR)  # Set board color
+
+        board_surface = pygame.Surface(2 * (self.board_width,), flags=SRCALPHA)
         for x in range(self.game_state.board_size):  # Draws lines
             start = (
                 int((x + 0.5) * self.square_width),
@@ -93,7 +96,7 @@ class UI:
                 int((x + 0.5) * self.square_width),
                 self.board_width - self.square_width // 2,
             )
-            pygame.draw.line(self.display, FG_COLOR, start, end, LINE_WIDTH)
+            pygame.draw.line(board_surface, FG_COLOR, start, end, LINE_WIDTH)
         for y in range(self.game_state.board_size):
             start = (
                 self.square_width // 2,
@@ -103,18 +106,20 @@ class UI:
                 self.board_width - self.square_width // 2,
                 int((y + 0.5) * self.square_width),
             )
-            pygame.draw.line(self.display, FG_COLOR, start, end, LINE_WIDTH)
+            pygame.draw.line(board_surface, FG_COLOR, start, end, LINE_WIDTH)
 
         # Draws hoshi positions
         for x, y in HOSHI_POSITIONS[self.game_state.board_size]:
             for f in (pygame.gfxdraw.filled_circle, pygame.gfxdraw.aacircle):
                 f(
-                    self.display,
+                    board_surface,
                     int((x + 0.5) * self.square_width),
                     int((y + 0.5) * self.square_width),
                     self.hoshi_radius,
                     FG_COLOR,
                 )
+
+        self.display.blit(board_surface, self.display_padding)
 
     def _get_ring_draw_options(self, ring: Ring):
         return (
@@ -137,6 +142,9 @@ class UI:
         self.board_width = self.square_width * self.game_state.board_size
         self.hoshi_radius = int(HOSHI_RADIUS_SCALE * self.square_width)
         self.stone_radius = int(STONE_RADIUS_SCALE * self.square_width)
+        self.display_padding = tuple(
+            (x - self.board_width) // 2 for x in self.display_size
+        )
 
     def _resize(self, size):
         self.display_size = size
