@@ -15,6 +15,7 @@ from pygame.locals import (
     MOUSEBUTTONDOWN,
     MOUSEMOTION,
     QUIT,
+    VIDEORESIZE,
 )
 
 from .models import Color, GameState, Position, Ring, Stone
@@ -57,24 +58,13 @@ class UI:
         self.game_state = game_state
 
         self.display_size = 2 * (DEFAULT_SQUARE_WIDTH * self.game_state.board_size,)
-
-        self.hoshi_radius = int(HOSHI_RADIUS_SCALE * self.square_width)
-        self.stone_radius = int(STONE_RADIUS_SCALE * self.square_width)
+        self._calculate_geometry()
 
         self.highlight: Optional[Ring] = None  # Indicates whose turn it is
 
         self._outgoing_event_q = asyncio.Queue()
-
         self._loop = asyncio.get_running_loop()
         self._pool = concurrent.futures.ThreadPoolExecutor()
-
-    @property
-    def board_width(self):
-        return min(self.display_size)
-
-    @property
-    def square_width(self):
-        return self.display_size[0] // self.game_state.board_size
 
     async def mouse_handler(self, e):
         pos = Position(*[coord // self.square_width for coord in e.pos])
@@ -142,6 +132,17 @@ class UI:
         self._draw_ring(stone)
         pygame.gfxdraw.filled_circle(*self._get_ring_draw_options(stone))
 
+    def _calculate_geometry(self):
+        self.square_width = min(self.display_size) // self.game_state.board_size
+        self.board_width = self.square_width * self.game_state.board_size
+        self.hoshi_radius = int(HOSHI_RADIUS_SCALE * self.square_width)
+        self.stone_radius = int(STONE_RADIUS_SCALE * self.square_width)
+
+    def _resize(self, size):
+        self.display_size = size
+        self.display = pygame.display.set_mode(size, pygame.RESIZABLE)
+        self._calculate_geometry()
+
     async def _send(self, event_type, **attrs):
         event = Event(event_type, **attrs)
         await self._outgoing_event_q.put(event)
@@ -177,6 +178,8 @@ class UI:
                         break
                 elif e.type in (MOUSEMOTION, MOUSEBUTTONDOWN):
                     await self.mouse_handler(e)
+                elif e.type == VIDEORESIZE:
+                    self._resize(e.size)
             if running:
                 await self._outgoing_event_q.join()
                 await self.render()
