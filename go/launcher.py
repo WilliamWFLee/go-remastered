@@ -23,22 +23,39 @@ class Launcher:
         self._root = Tk()
         self._root.title("Go Launcher")
         self._root.resizable(False, False)
-        self._root.protocol("WM_DELETE_WINDOW", self.on_close)
+        self._root.protocol("WM_DELETE_WINDOW", self._on_close)
 
         # Board size input box
         self._size_label = Label(self._root, text="Board Size (9, 13, or [19])")
-        self._size_label.grid(row=0, column=0, sticky=W, **PADDING)
         self._size_entry = Entry(self._root)
-        self._size_entry.grid(row=0, column=1, **PADDING)
 
         # Go button
         self._go_button = Button(
             self._root, text="Go!", command=self.set_config, padx=40
         )
+
+        self._widgets = [
+            self._size_label,
+            self._size_entry,
+            self._go_button,
+        ]
+
+        self._show_board_config_screen()
+
+    def _screen_change(self):
+        for widget in self._widgets:
+            widget.grid_remove()
+
+    def _show_board_config_screen(self):
+        self._screen_change()
+
+        self._size_label.grid(row=0, column=0, sticky=W, **PADDING)
+        self._size_entry.grid(row=0, column=1, **PADDING)
+
         self._go_button.grid(row=2, column=0, columnspan=2, **PADDING)
         self._root.bind("<Return>", lambda e: self.set_config())
 
-    def on_close(self) -> None:
+    def _on_close(self) -> None:
         self.config = None
         self._root.destroy()
 
