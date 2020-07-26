@@ -25,6 +25,13 @@ class Launcher:
         self._root.resizable(False, False)
         self._root.protocol("WM_DELETE_WINDOW", self._on_close)
 
+        self._local_game_button = Button(
+            self._root,
+            text="Play locally",
+            command=self._show_local_game_setup,
+            padx=40,
+        )
+
         # Board size input box
         self._size_label = Label(self._root, text="Board Size (9, 13, or [19])")
         self._size_entry = Entry(self._root)
@@ -35,18 +42,22 @@ class Launcher:
         )
 
         self._widgets = [
+            self._local_game_button,
             self._size_label,
             self._size_entry,
             self._go_button,
         ]
 
-        self._show_board_config_screen()
+        self._show_main_menu()
 
     def _screen_change(self):
         for widget in self._widgets:
-            widget.grid_remove()
+            widget.grid_forget()
 
-    def _show_board_config_screen(self):
+    def _show_main_menu(self):
+        self._local_game_button.grid(row=0, column=0, **PADDING)
+
+    def _show_local_game_setup(self):
         self._screen_change()
 
         self._size_label.grid(row=0, column=0, sticky=W, **PADDING)
