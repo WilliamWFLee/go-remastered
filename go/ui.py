@@ -68,7 +68,12 @@ class UI:
         self._pool = concurrent.futures.ThreadPoolExecutor()
 
     async def mouse_handler(self, e):
-        pos = Position(*[coord // self.square_width for coord in e.pos])
+        pos = Position(
+            *[
+                (coord - padding) // self.square_width
+                for coord, padding in zip(e.pos, self.display_padding)
+            ]
+        )
         if (0, 0) <= pos <= 2 * (
             self.game_state.board_size - 1,
         ) and pos not in self.game_state.stones:
@@ -124,8 +129,8 @@ class UI:
     def _get_ring_draw_options(self, ring: Ring):
         return (
             self.display,
-            int((ring.pos.x + 0.5) * self.square_width),
-            int((ring.pos.y + 0.5) * self.square_width),
+            int((ring.pos.x + 0.5) * self.square_width) + self.display_padding[0],
+            int((ring.pos.y + 0.5) * self.square_width) + self.display_padding[1],
             self.stone_radius,
             DEFAULT_COLORS[ring.color],
         )
