@@ -25,12 +25,26 @@ class Launcher:
         self._root.resizable(False, False)
         self._root.protocol("WM_DELETE_WINDOW", self._on_close)
 
+        # Button to hold local game
         self._local_game_button = Button(
             self._root,
             text="Play locally",
             command=self._show_local_game_setup,
             padx=40,
         )
+
+        # Button to host a game
+        self._host_game_button = Button(
+            self._root, text="Host a game", command=self._show_host_game_setup, padx=40
+        )
+
+        # Host input box
+        self._host_label = Label(self._root, text="Address [0.0.0.0]")
+        self._host_entry = Entry(self._root)
+
+        # Port input box
+        self._port_label = Label(self._root, text="Port [18255]")
+        self._port_entry = Entry(self._root)
 
         # Board size input box
         self._size_label = Label(self._root, text="Board Size (9, 13, or [19])")
@@ -43,6 +57,11 @@ class Launcher:
 
         self._widgets = [
             self._local_game_button,
+            self._host_game_button,
+            self._host_label,
+            self._host_entry,
+            self._port_label,
+            self._port_entry,
             self._size_label,
             self._size_entry,
             self._go_button,
@@ -54,14 +73,31 @@ class Launcher:
         for widget in self._widgets:
             widget.grid_forget()
 
+        self._root.unbind("<Return>")
+
     def _show_main_menu(self):
-        self._local_game_button.grid(row=0, column=0, **PADDING)
+        self._screen_change()
+
+        self._local_game_button.grid(row=0, **PADDING)
+        self._host_game_button.grid(row=1, **PADDING)
 
     def _show_local_game_setup(self):
         self._screen_change()
 
         self._size_label.grid(row=0, column=0, sticky=W, **PADDING)
         self._size_entry.grid(row=0, column=1, **PADDING)
+
+        self._go_button.grid(row=1, column=0, columnspan=2, **PADDING)
+        self._root.bind("<Return>", lambda e: self.set_config())
+
+    def _show_host_game_setup(self):
+        self._screen_change()
+
+        self._host_label.grid(row=0, column=0, sticky=W, **PADDING)
+        self._host_entry.grid(row=0, column=1, **PADDING)
+
+        self._port_label(row=1, column=0, sticky=W, **PADDING)
+        self._port_entry.grid(row=1, column=1, **PADDING)
 
         self._go_button.grid(row=2, column=0, columnspan=2, **PADDING)
         self._root.bind("<Return>", lambda e: self.set_config())
