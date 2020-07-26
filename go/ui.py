@@ -88,10 +88,7 @@ class UI:
         elif e.type == MOUSEMOTION:
             self.highlight = None
 
-    def _draw_board(self):
-        self.display.fill(BOARD_COLOR)  # Set board color
-
-        board_surface = pygame.Surface(2 * (self.board_width,), flags=SRCALPHA)
+    def _draw_board(self, surface):
         for x in range(self.game_state.board_size):  # Draws lines
             start = (
                 int((x + 0.5) * self.square_width),
@@ -101,7 +98,7 @@ class UI:
                 int((x + 0.5) * self.square_width),
                 self.board_width - self.square_width // 2,
             )
-            pygame.draw.line(board_surface, FG_COLOR, start, end, LINE_WIDTH)
+            pygame.draw.line(surface, FG_COLOR, start, end, LINE_WIDTH)
         for y in range(self.game_state.board_size):
             start = (
                 self.square_width // 2,
@@ -111,36 +108,33 @@ class UI:
                 self.board_width - self.square_width // 2,
                 int((y + 0.5) * self.square_width),
             )
-            pygame.draw.line(board_surface, FG_COLOR, start, end, LINE_WIDTH)
+            pygame.draw.line(surface, FG_COLOR, start, end, LINE_WIDTH)
 
         # Draws hoshi positions
         for x, y in HOSHI_POSITIONS[self.game_state.board_size]:
             for f in (pygame.gfxdraw.aacircle, pygame.gfxdraw.filled_circle):
                 f(
-                    board_surface,
+                    surface,
                     int((x + 0.5) * self.square_width),
                     int((y + 0.5) * self.square_width),
                     self.hoshi_radius,
                     FG_COLOR,
                 )
 
-        self.display.blit(board_surface, self.display_padding)
-
     def _get_ring_draw_options(self, ring: Ring):
         return (
-            self.display,
-            int((ring.pos.x + 0.5) * self.square_width) + self.display_padding[0],
-            int((ring.pos.y + 0.5) * self.square_width) + self.display_padding[1],
+            int((ring.pos.x + 0.5) * self.square_width),
+            int((ring.pos.y + 0.5) * self.square_width),
             self.stone_radius,
             DEFAULT_COLORS[ring.color],
         )
 
-    def _draw_ring(self, ring: Ring):
-        pygame.gfxdraw.aacircle(*self._get_ring_draw_options(ring))
+    def _draw_ring(self, surface, ring: Ring):
+        pygame.gfxdraw.aacircle(surface, *self._get_ring_draw_options(ring))
 
-    def _draw_stone(self, stone: Stone):
-        self._draw_ring(stone)
-        pygame.gfxdraw.filled_circle(*self._get_ring_draw_options(stone))
+    def _draw_stone(self, surface, stone: Stone):
+        self._draw_ring(surface, stone)
+        pygame.gfxdraw.filled_circle(surface, *self._get_ring_draw_options(stone))
 
     def _calculate_geometry(self):
         self.square_width = min(self.display_size) // self.game_state.board_size
@@ -161,12 +155,15 @@ class UI:
         await self._outgoing_event_q.put(event)
 
     async def render(self):
-        self._draw_board()
+        self.display.fill(BOARD_COLOR)  # Set board color
+        board_surface = pygame.Surface(2 * (self.board_width,), flags=SRCALPHA)
+        self._draw_board(board_surface)
         for stone in self.game_state.stones.values():
-            self._draw_stone(stone)
+            self._draw_stone(board_surface, stone)
         if self.highlight is not None:
-            self._draw_ring(self.highlight)
+            self._draw_ring(board_surface, self.highlight)
 
+        self.display.blit(board_surface, self.display_padding)
         await self._loop.run_in_executor(self._pool, pygame.display.update)
 
     async def run(self):
