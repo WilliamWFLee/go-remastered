@@ -19,9 +19,9 @@ from pygame.locals import (
 
 from .models import Color, GameState, Position, Ring, Stone
 
+DEFAULT_SQUARE_WIDTH = 50
 LINE_WIDTH = 2
 BOARD_COLOR = (220, 181, 121)
-DEFAULT_SQUARE_WIDTH = 50
 DEFAULT_COLORS = {
     Color.BLACK: (0, 0, 0),
     Color.WHITE: (255, 255, 255),
@@ -53,26 +53,28 @@ class Event:
 
 
 class UI:
-    def __init__(
-        self, game_state: GameState, square_width: Optional[int] = None
-    ):
+    def __init__(self, game_state: GameState):
         self.game_state = game_state
-        # Game dimensions
-        self.square_width = (
-            square_width if square_width is not None else DEFAULT_SQUARE_WIDTH
-        )
+
+        self.display_size = 2 * (DEFAULT_SQUARE_WIDTH * self.game_state.board_size,)
 
         self.hoshi_radius = int(HOSHI_RADIUS_SCALE * self.square_width)
         self.stone_radius = int(STONE_RADIUS_SCALE * self.square_width)
-        self.board_width = self.game_state.board_size * self.square_width
 
-        self.screen_dimensions = 2 * (self.board_width,)
         self.highlight: Optional[Ring] = None  # Indicates whose turn it is
 
         self._outgoing_event_q = asyncio.Queue()
 
         self._loop = asyncio.get_running_loop()
         self._pool = concurrent.futures.ThreadPoolExecutor()
+
+    @property
+    def board_width(self):
+        return min(self.display_size)
+
+    @property
+    def square_width(self):
+        return self.display_size[0] // self.game_state.board_size
 
     async def mouse_handler(self, e):
         pos = Position(*[coord // self.square_width for coord in e.pos])
@@ -158,7 +160,7 @@ class UI:
         pygame.display.set_caption("Go")
         pygame.key.set_repeat(KEY_REPEAT_DELAY, KEY_REPEAT_INTERVAL)
 
-        self.display = pygame.display.set_mode(self.screen_dimensions)
+        self.display = pygame.display.set_mode(self.display_size)
 
         running = True
         while running:
@@ -168,8 +170,7 @@ class UI:
                     break
                 elif e.type == KEYDOWN:
                     ctrl, alt = (
-                        pygame.key.get_mods() & key
-                        for key in (KMOD_CTRL, KMOD_ALT)
+                        pygame.key.get_mods() & key for key in (KMOD_CTRL, KMOD_ALT)
                     )
                     if e.key == K_F4 and alt:
                         running = False

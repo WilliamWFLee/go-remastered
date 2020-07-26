@@ -11,7 +11,7 @@ PADDING = {
     "pady": 5,
 }
 
-Config = namedtuple("Config", "board_size square_width")
+Config = namedtuple("Config", "board_size")
 
 
 class Launcher:
@@ -31,12 +31,6 @@ class Launcher:
         self._size_entry = Entry(self._root)
         self._size_entry.grid(row=0, column=1, **PADDING)
 
-        # Square width input box
-        self._square_width_label = Label(self._root, text="Square Width [50]")
-        self._square_width_label.grid(row=1, column=0, sticky=W, **PADDING)
-        self._square_width_entry = Entry(self._root)
-        self._square_width_entry.grid(row=1, column=1, **PADDING)
-
         # Go button
         self._go_button = Button(
             self._root, text="Go!", command=self.set_config, padx=40
@@ -50,13 +44,9 @@ class Launcher:
 
     def set_config(self) -> None:
         self._size_label.config(fg="#000")
-        self._square_width_label.config(fg="#000")
 
         board_size = self._size_entry.get()
-        square_width = self._square_width_entry.get()
-
         board_size = int(board_size) if board_size else 0
-        square_width = int(square_width) if square_width else 0
 
         if not board_size:
             board_size = None
@@ -69,35 +59,7 @@ class Launcher:
             self._size_label.config(fg="red")
             return
 
-        if not square_width:
-            square_width = None
-        elif square_width < 5:
-            messagebox.showerror(
-                title="Error",
-                message=(
-                    f"Chosen square width ({square_width}) is too small."
-                    "Game will not render correctly"
-                ),
-            )
-            self._square_width_label.config(fg="red")
-            return
-        elif square_width < 15:
-            messagebox.showwarning(
-                title="Warning",
-                message=(
-                    f"Chosen square width ({square_width}) " "may make text unreadable"
-                ),
-            )
-        elif square_width < 10:
-            messagebox.showwarning(
-                title="Warning",
-                message=(
-                    f"Chosen square width ({square_width}) "
-                    "may make game challenging to play"
-                ),
-            )
-
-        self.config = Config(board_size=board_size, square_width=square_width)
+        self.config = Config(board_size=board_size)
 
         # Destroys Tk root if config is successful
         self._root.destroy()

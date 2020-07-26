@@ -26,7 +26,7 @@ class Client(ClientServerBase):
         launcher = Launcher()
         self.config = launcher.get_config()
         self.game_state = GameState(self.config.board_size)
-        self.ui = UI(self.game_state, self.config.square_width)
+        self.ui = UI(self.game_state)
 
         self.timeout = timeout
 
