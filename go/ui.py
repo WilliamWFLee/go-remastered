@@ -115,7 +115,7 @@ class UI:
 
         # Draws hoshi positions
         for x, y in HOSHI_POSITIONS[self.game_state.board_size]:
-            for f in (pygame.gfxdraw.filled_circle, pygame.gfxdraw.aacircle):
+            for f in (pygame.gfxdraw.aacircle, pygame.gfxdraw.filled_circle):
                 f(
                     board_surface,
                     int((x + 0.5) * self.square_width),
