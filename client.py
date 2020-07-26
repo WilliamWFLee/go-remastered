@@ -58,3 +58,6 @@ class Client(ClientServerBase):
 
             asyncio.create_task(self._event_worker())
             await self.ui.run()
+
+            self._connection.writer.close()
+            await self._connection.writer.wait_closed()
