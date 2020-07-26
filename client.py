@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 import asyncio
-from typing import Optional
 
 from config import ConfigDialog
 from models import GameState
@@ -21,9 +20,7 @@ class Connection(ConnectionBase):
 
 
 class Client(ClientServerBase):
-    def __init__(
-        self, host=None, port=None, timeout: Optional[float] = None,
-    ):
+    def __init__(self, host=None, port=None, timeout=None):
         super().__init__(host=host if host else DEFAULT_HOST, port=port)
 
         config_dialog = ConfigDialog()
