@@ -32,6 +32,9 @@ class Client(ClientServerBase):
         self._connection = Connection(reader, writer)
         await self._handshake()
 
+    async def _disconnect(self):
+        await self._connection.close()
+
     async def _handshake(self):
         await self._connection.send("go")
 
@@ -52,5 +55,4 @@ class Client(ClientServerBase):
         asyncio.create_task(self._event_worker())
         await self.ui.run()
 
-        self._connection.writer.close()
-        await self._connection.writer.wait_closed()
+        await self._disconnect()

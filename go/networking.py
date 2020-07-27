@@ -29,3 +29,7 @@ class ConnectionBase:
             return data[:-1].decode()
         except asyncio.TimeoutError:
             pass
+
+    async def close(self):
+        self.writer.close()
+        await self.writer.wait_closed()
