@@ -2,16 +2,13 @@
 
 import asyncio
 
+from . import __version__
+from .errors import DataException, VersionException
 from .models import GameState
 from .networking import ClientServerBase, ConnectionBase
 from .ui import UI, EventType
 
-
 DEFAULT_HOST = "127.0.0.1"
-
-
-class ResponseException(Exception):
-    pass
 
 
 class Connection(ConnectionBase):
@@ -36,11 +33,11 @@ class Client(ClientServerBase):
         await self._connection.close()
 
     async def _handshake(self):
-        await self._connection.send("go")
-
-        response = await self._connection.recv()
-        if response != "ok":
-            raise ResponseException(f"Invalid handshake response {response!r}")
+        response = await self._connection.send_recv(f"go {__version__}")
+        if response == "no":
+            raise VersionException(f"Server does not support version {__version__}")
+        elif response != f"ok {__version__}":
+            raise DataException(f"Invalid handshake response {response!r}")
 
     async def _event_worker(self):
         while True:

@@ -2,16 +2,25 @@
 
 import asyncio
 
+from . import __version__
 from .networking import ClientServerBase, ConnectionBase
-
+from .errors import DataException
 
 DEFAULT_HOST = "0.0.0.0"
 
 
 class Connection(ConnectionBase):
+    async def _handshake(self):
+        request = await self.recv()
+        if not request.startswith("go"):
+            raise DataException(f"Invalid handshake request {request!r}")
+        elif request != f"go {__version__}":
+            await self.send("no")
+        else:
+            await self.send(f"ok {__version__}")
+
     async def serve(self):
-        await self.recv()
-        await self.send("ok")
+        await self._handshake()
 
 
 class Server(ClientServerBase):
