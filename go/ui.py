@@ -18,7 +18,7 @@ from pygame.locals import (
     VIDEORESIZE,
 )
 
-from .models import Color, GameState, Position, Ring, Stone
+from .models import Color, Position, Ring, Stone
 
 DEFAULT_SQUARE_WIDTH = 50
 LINE_WIDTH = 2
@@ -54,10 +54,9 @@ class Event:
 
 
 class UI:
-    def __init__(self, game_state: GameState):
-        self.game_state = game_state
-
-        self.display_size = 2 * (DEFAULT_SQUARE_WIDTH * self.game_state.board_size,)
+    def __init__(self, client):
+        self.client = client
+        self.display_size = 2 * (DEFAULT_SQUARE_WIDTH * self.client.board_size,)
         self._calculate_geometry()
 
         self.highlight: Optional[Ring] = None  # Indicates whose turn it is
@@ -74,21 +73,21 @@ class UI:
             ]
         )
         if (0, 0) <= pos <= 2 * (
-            self.game_state.board_size - 1,
-        ) and pos not in self.game_state.stones:
+            self.client.board_size - 1,
+        ) and pos not in self.client.stones:
             if e.type == MOUSEBUTTONDOWN and e.button == 1:
                 await self._send(EventType.PLACE_STONE, pos=pos)
             elif e.type == MOUSEMOTION:
                 if self.highlight:
                     self.highlight.pos = pos
-                    self.highlight.color = self.game_state.current_color
+                    self.highlight.color = self.client.color
                 else:
-                    self.highlight = Ring(pos, self.game_state.current_color)
+                    self.highlight = Ring(pos, self.client.color)
         elif e.type == MOUSEMOTION:
             self.highlight = None
 
     def _draw_board(self, surface):
-        for x in range(self.game_state.board_size):  # Draws lines
+        for x in range(self.client.board_size):  # Draws lines
             start = (
                 int((x + 0.5) * self.square_width),
                 self.square_width // 2,
@@ -98,7 +97,7 @@ class UI:
                 self.board_width - self.square_width // 2,
             )
             pygame.draw.line(surface, FG_COLOR, start, end, LINE_WIDTH)
-        for y in range(self.game_state.board_size):
+        for y in range(self.client.board_size):
             start = (
                 self.square_width // 2,
                 int((y + 0.5) * self.square_width),
@@ -110,7 +109,7 @@ class UI:
             pygame.draw.line(surface, FG_COLOR, start, end, LINE_WIDTH)
 
         # Draws hoshi positions
-        for x, y in HOSHI_POSITIONS[self.game_state.board_size]:
+        for x, y in HOSHI_POSITIONS[self.client.board_size]:
             for f in (pygame.gfxdraw.aacircle, pygame.gfxdraw.filled_circle):
                 f(
                     surface,
@@ -136,8 +135,8 @@ class UI:
         pygame.gfxdraw.filled_circle(surface, *self._get_ring_draw_options(stone))
 
     def _calculate_geometry(self):
-        self.square_width = min(self.display_size) // self.game_state.board_size
-        self.board_width = self.square_width * self.game_state.board_size
+        self.square_width = min(self.display_size) // self.client.board_size
+        self.board_width = self.square_width * self.client.board_size
         self.hoshi_radius = int(HOSHI_RADIUS_SCALE * self.square_width)
         self.stone_radius = int(STONE_RADIUS_SCALE * self.square_width)
         self.display_padding = tuple(
@@ -160,7 +159,7 @@ class UI:
         board_surface.fill(BOARD_COLOR)
 
         self._draw_board(board_surface)
-        for stone in self.game_state.stones.values():
+        for stone in self.client.stones.values():
             self._draw_stone(board_surface, stone)
         if self.highlight is not None:
             self._draw_ring(board_surface, self.highlight)

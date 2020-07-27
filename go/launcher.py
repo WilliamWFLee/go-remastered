@@ -77,6 +77,17 @@ class Launcher:
 
         self._show_main_menu()
 
+    @property
+    def _go_command(self):
+        return self.__go_command
+
+    @_go_command.setter
+    def _go_command(self, func):
+        def wrapper():
+            func()
+            self._root.destroy()
+        self.__go_command = wrapper
+
     def _screen_change(self):
         for widget in self._widgets:
             widget.grid_forget()
@@ -110,11 +121,10 @@ class Launcher:
         self._go_button.grid(row=2, column=0, columnspan=2, **PADDING)
 
     def _on_close(self):
-        self.config = None
         self._root.destroy()
 
-    async def run_server(self, host=None, port=None):
-        self.server = Server(host=host, port=port)
+    async def run_server(self, board_size, host=None, port=None):
+        self.server = Server(board_size, host=host, port=port)
         await self.server.serve()
 
     async def launch_local_game(self):
@@ -137,9 +147,9 @@ class Launcher:
         # Destroys Tk root if config is successful
         self._root.withdraw()
 
-        asyncio.create_task(self.run_server("127.0.0.1"))
+        asyncio.create_task(self.run_server(board_size, "127.0.0.1"))
 
-        self.client = Client(board_size=board_size)
+        self.client = Client()
         await self.client.run()
 
         await self.server.close()

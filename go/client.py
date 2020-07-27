@@ -4,7 +4,6 @@ import asyncio
 
 from . import __version__
 from .errors import DataException, VersionException
-from .models import GameState
 from .networking import ClientServerBase, ConnectionBase
 from .ui import UI, EventType
 
@@ -16,12 +15,11 @@ class Connection(ConnectionBase):
 
 
 class Client(ClientServerBase):
-    def __init__(self, host=None, port=None, timeout=None, *, board_size):
+    def __init__(self, host=None, port=None, timeout=None):
         super().__init__(host=host if host else DEFAULT_HOST, port=port)
-
-        self.game_state = GameState(board_size)
-        self.ui = UI(self.game_state)
-
+        self.board_size = None
+        self.stones = {}
+        self.color = None
         self.timeout = timeout
 
     async def _connect(self):
@@ -50,6 +48,7 @@ class Client(ClientServerBase):
         await self._connect()
 
         asyncio.create_task(self._event_worker())
+        self.ui = UI(self)
         await self.ui.run()
 
         await self._disconnect()

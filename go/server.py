@@ -3,8 +3,9 @@
 import asyncio
 
 from . import __version__
-from .networking import ClientServerBase, ConnectionBase
 from .errors import DataException
+from .models import GameState
+from .networking import ClientServerBase, ConnectionBase
 
 DEFAULT_HOST = "0.0.0.0"
 
@@ -28,8 +29,9 @@ class Connection(ConnectionBase):
 
 
 class Server(ClientServerBase):
-    def __init__(self, host=None, port=None):
+    def __init__(self, board_size, host=None, port=None):
         super().__init__(host if host else DEFAULT_HOST, port=port)
+        self.game_state = GameState(board_size)
         self._connections = []
 
     async def _connected(self, reader, writer):
