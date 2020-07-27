@@ -109,7 +109,7 @@ class Launcher:
 
         self._go_button.grid(row=2, column=0, columnspan=2, **PADDING)
 
-    def _on_close(self) -> None:
+    def _on_close(self):
         self.config = None
         self._root.destroy()
 
@@ -117,7 +117,7 @@ class Launcher:
         self.server = Server(host=host, port=port)
         await self.server.serve()
 
-    async def launch_local_game(self) -> None:
+    async def launch_local_game(self):
         self._size_label.config(fg="#000")
 
         board_size = self._size_entry.get()
