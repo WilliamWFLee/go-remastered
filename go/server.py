@@ -10,6 +10,10 @@ DEFAULT_HOST = "0.0.0.0"
 
 
 class Connection(ConnectionBase):
+    def __init__(self, server, reader, writer, timeout=None):
+        super().__init__(reader, writer, timeout=timeout)
+        self.server = server
+
     async def _handshake(self):
         request = await self.recv()
         if not request.startswith("go"):
@@ -29,7 +33,7 @@ class Server(ClientServerBase):
         self._connections = []
 
     async def _connected(self, reader, writer):
-        connection = Connection(reader, writer)
+        connection = Connection(self, reader, writer)
         self._connections += [connection]
         await connection.serve()
 
