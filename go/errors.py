@@ -45,7 +45,7 @@ class VersionException(HandshakeException):
     pass
 
 
-class ServerFullException(Exception):
+class ServerFullException(ConnectionException):
     """
     The server cannot accept any more clients
     """
@@ -53,7 +53,7 @@ class ServerFullException(Exception):
     pass
 
 
-class DataException(Exception):
+class DataException(ConnectionException):
     """
     The data received is not of the correct format
     """
