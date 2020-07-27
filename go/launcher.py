@@ -8,7 +8,7 @@ from collections import namedtuple
 from tkinter import Button, Entry, Label, Tk, W, messagebox
 
 from .client import Client
-from .server import Server
+from .server import Mode, Server
 
 PADDING = {
     "padx": 10,
@@ -123,7 +123,7 @@ class Launcher:
     def _on_close(self):
         self._root.destroy()
 
-    async def run_server(self, board_size, host=None, port=None):
+    async def run_server(self, board_size, host=None, port=None, *, mode):
         self.server = Server(board_size, host=host, port=port)
         await self.server.serve()
 
@@ -147,7 +147,7 @@ class Launcher:
         # Destroys Tk root if config is successful
         self._root.withdraw()
 
-        asyncio.create_task(self.run_server(board_size, "127.0.0.1"))
+        asyncio.create_task(self.run_server(board_size, "127.0.0.1", mode=Mode.LOCAL))
 
         self.client = Client()
         await self.client.run()
