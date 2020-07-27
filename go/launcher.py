@@ -3,8 +3,12 @@
 Initiates launcher, and gets game config from user
 """
 
+import asyncio
 from collections import namedtuple
 from tkinter import Button, Entry, Label, Tk, W, messagebox
+
+from .client import Client
+from .server import Server
 
 PADDING = {
     "padx": 10,
@@ -50,10 +54,14 @@ class Launcher:
         self._size_label = Label(self._root, text="Board Size (9, 13, or [19])")
         self._size_entry = Entry(self._root)
 
+        # Stores command to execute for launch
+        self._go_command = lambda: None
+
         # Go button
         self._go_button = Button(
-            self._root, text="Go!", command=self.set_config, padx=40
+            self._root, text="Go!", command=lambda: self._go_command(), padx=40
         )
+        self._root.bind("<Return>", self._go_command)
 
         self._widgets = [
             self._local_game_button,
@@ -73,7 +81,7 @@ class Launcher:
         for widget in self._widgets:
             widget.grid_forget()
 
-        self._root.unbind("<Return>")
+        self._go_command = lambda: None
 
     def _show_main_menu(self):
         self._screen_change()
@@ -83,12 +91,12 @@ class Launcher:
 
     def _show_local_game_setup(self):
         self._screen_change()
+        self._go_command = lambda: asyncio.run(self.launch_local_game())
 
         self._size_label.grid(row=0, column=0, sticky=W, **PADDING)
         self._size_entry.grid(row=0, column=1, **PADDING)
 
         self._go_button.grid(row=1, column=0, columnspan=2, **PADDING)
-        self._root.bind("<Return>", lambda e: self.set_config())
 
     def _show_host_game_setup(self):
         self._screen_change()
@@ -100,13 +108,16 @@ class Launcher:
         self._port_entry.grid(row=1, column=1, **PADDING)
 
         self._go_button.grid(row=2, column=0, columnspan=2, **PADDING)
-        self._root.bind("<Return>", lambda e: self.set_config())
 
     def _on_close(self) -> None:
         self.config = None
         self._root.destroy()
 
-    def set_config(self) -> None:
+    async def run_server(self, host=None, port=None):
+        self.server = Server(host=host, port=port)
+        await self.server.serve()
+
+    async def launch_local_game(self) -> None:
         self._size_label.config(fg="#000")
 
         board_size = self._size_entry.get()
@@ -123,11 +134,13 @@ class Launcher:
             self._size_label.config(fg="red")
             return
 
-        self.config = Config(board_size=board_size)
-
         # Destroys Tk root if config is successful
         self._root.destroy()
 
-    def get_config(self) -> Config:
+        asyncio.create_task(self.run_server("127.0.0.1"))
+
+        self.client = Client(board_size=board_size)
+        await self.client.run()
+
+    def mainloop(self) -> None:
         self._root.mainloop()
-        return self.config

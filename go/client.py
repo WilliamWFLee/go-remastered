@@ -2,7 +2,6 @@
 
 import asyncio
 
-from .launcher import Launcher
 from .models import GameState
 from .networking import ClientServerBase, ConnectionBase
 from .ui import UI, EventType
@@ -20,12 +19,10 @@ class Connection(ConnectionBase):
 
 
 class Client(ClientServerBase):
-    def __init__(self, host=None, port=None, timeout=None):
+    def __init__(self, host=None, port=None, timeout=None, *, board_size):
         super().__init__(host=host if host else DEFAULT_HOST, port=port)
 
-        launcher = Launcher()
-        self.config = launcher.get_config()
-        self.game_state = GameState(self.config.board_size)
+        self.game_state = GameState(board_size)
         self.ui = UI(self.game_state)
 
         self.timeout = timeout
@@ -50,11 +47,10 @@ class Client(ClientServerBase):
             self.ui._outgoing_event_q.task_done()
 
     async def run(self):
-        if self.config is not None:
-            await self._connect()
+        await self._connect()
 
-            asyncio.create_task(self._event_worker())
-            await self.ui.run()
+        asyncio.create_task(self._event_worker())
+        await self.ui.run()
 
-            self._connection.writer.close()
-            await self._connection.writer.wait_closed()
+        self._connection.writer.close()
+        await self._connection.writer.wait_closed()

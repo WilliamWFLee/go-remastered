@@ -4,15 +4,12 @@ A graphical version of the board game Go
 Copyright (c) 2020 William Lee
 """
 
-import asyncio
-
-from go.client import Client
+from go.launcher import Launcher
 
 
-async def main():
-    client = Client()
-    await client.run()
+def main():
+    launcher = Launcher()
+    launcher.mainloop()
 
 
-if __name__ == "__main__":
-    asyncio.run(main())
+main()
