@@ -21,7 +21,7 @@ class ConnectionCloseException(ConnectionException):
     pass
 
 
-class TimeoutError(ConnectionException):
+class ConnectionTimeoutError(ConnectionException):
     """
     A connection operation has timed out
     """
