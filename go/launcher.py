@@ -142,5 +142,7 @@ class Launcher:
         self.client = Client(board_size=board_size)
         await self.client.run()
 
+        self._root.destroy()
+
     def mainloop(self) -> None:
         self._root.mainloop()
