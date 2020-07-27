@@ -135,7 +135,7 @@ class Launcher:
             return
 
         # Destroys Tk root if config is successful
-        self._root.destroy()
+        self._root.withdraw()
 
         asyncio.create_task(self.run_server("127.0.0.1"))
 
