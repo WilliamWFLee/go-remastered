@@ -2,6 +2,8 @@
 
 import asyncio
 
+from .errors import ConnectionTimeoutError
+
 DEFAULT_PORT = 18255
 
 
@@ -28,7 +30,11 @@ class ConnectionBase:
             )
             return data[:-1].decode()
         except asyncio.TimeoutError:
-            pass
+            raise ConnectionTimeoutError("Timeout exceeded.")
+
+    async def send_recv(self, data: str):
+        await self.send(data)
+        return await self.recv()
 
     async def close(self):
         self.writer.close()
