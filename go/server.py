@@ -5,7 +5,7 @@ from enum import Enum, auto
 
 from . import __version__
 from .errors import DataException
-from .models import GameState
+from .models import GameState, Position
 from .networking import ClientServerBase, ConnectionBase
 
 DEFAULT_HOST = "0.0.0.0"
@@ -30,8 +30,25 @@ class Connection(ConnectionBase):
         else:
             await self.send(f"ok {request.split()[1]}")
 
+    async def _setup(self):
+        await self.send(f"mode {self.server.mode.name.lower()}")
+
+        stones_string = ""
+        for y in range(self.server.game_state.board_size):
+            for x in range(self.server.game_state.board_size):
+                pos = Position(x, y)
+                if pos not in self.server.game_state.stones:
+                    stones_string += "x"
+                else:
+                    stone = self.server.game_state.stones[pos]
+                    stones_string += stone.color.value
+
+        await self.send(f"stones {stones_string}")
+        await self.send("ready")
+
     async def serve(self):
         await self._handshake()
+        await self._setup()
 
 
 class Server(ClientServerBase):
