@@ -48,7 +48,7 @@ Over the course of the game, there are three events that can occur: a turn is ta
 Indicating turn
 ~~~~~~~~~~~~~~~
 
-1. The server sends ``yourturn`` to the client whose turn it is.
+1. The server sends ``yourturn <color>``, where ``<color>`` is as it is for ``color <color>``, to the client whose turn it is.
 2. The client responds ``ack`` to acknowledge.
 
 Stone placement
