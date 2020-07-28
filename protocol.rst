@@ -46,13 +46,13 @@ Main
 Over the course of the game, there are three events that can occur: a turn is taken, and therefore another client is allowed to place a stone; a stone is placed on the board in a turn; and a stone or stones is/are removed from the board.
 
 Indicating turn
----------------
+~~~~~~~~~~~~~~~
 
 1. The server sends ``yourturn`` to the client whose turn it is.
 2. The client responds ``ack`` to acknowledge.
 
 Stone placement
----------------
+~~~~~~~~~~~~~~~
 
 1. The client sends ``place <x> <y>`` where ``<x>`` and ``<y>`` are the coordinates of the stone to be placed, so ``place 0 0`` would be the top-left intersection on the board, and ``place 18 18`` would be the bottom-right intersection for a 19x19 board.
 2. The server then broadcasts ``place <color> <x> <y>`` to all clients, including the sender, where ``<color>`` is ``0`` for black or ``1`` for white.
@@ -63,7 +63,7 @@ Stone placement
 
 
 Stone removal
--------------
+~~~~~~~~~~~~~~~
 
 A removal of a stone only happens when a placement of a stone causes stones to be captured according to the rules of the game.
 
