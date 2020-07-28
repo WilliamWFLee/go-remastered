@@ -81,7 +81,5 @@ class Client(ClientServerBase):
         await self._connect()
         self.ui = UI(self)
 
-        asyncio.create_task(self._event_worker())
-        await self.ui.run()
-
+        await asyncio.gather(self._event_worker(), self.ui.run())
         await self._disconnect()
