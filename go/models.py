@@ -1,15 +1,15 @@
 # -*- coding: utf-8 -*-
 
 from collections import namedtuple
-from enum import Enum, auto
+from enum import Enum
 from typing import Dict, List, Optional, Set
 
 DEFAULT_BOARD_SIZE = 19
 
 
 class Color(Enum):
-    BLACK = auto()
-    WHITE = auto()
+    BLACK = 0
+    WHITE = 1
 
 
 class Direction(Enum):
