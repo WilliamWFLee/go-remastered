@@ -29,8 +29,8 @@ Game setup then happens to establish compatibility and initial state of the game
 
 2. The server sends ``mode <mode>`` where ``<mode>`` is either ``local`` if the server runs a local game or ``normal`` if the server runs a regular server.
 
-   a. If ``<mode>`` is ``local``, then it is implied that the client connecting is the sole client.
-   b. If ``<mode>`` is ``normal``, then the server sends ``color <color>``, ``<color>`` is whatever color the client is assigned: 0 for black, 1 for white
+   a. If ``<mode>`` is ``LOCAL``, then it is implied that the client connecting is the sole client.
+   b. If ``<mode>`` is ``NORMAL``, then the server sends ``color <color>``, ``<color>`` is whatever color the client is assigned: 0 for black, 1 for white
 
 3. The server sends ``stones <stones>`` where ``<stones>`` is a string detailing the state of each intersection on the board, from left to right, top to bottom, starting from the top-left. For each intersection, the string contains an ``X`` for an empty intersection, ``0`` for a black stone and ``1`` for a white stone. For example if we have a hypothetical 2x2 board with a black stone in the top-left corner, a white stone in the top-right corner, and empty intersections elsewhere, then ``<stones>`` would be ``01XX``.
 
