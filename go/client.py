@@ -4,6 +4,7 @@ import asyncio
 
 from . import __version__
 from .errors import DataException, ServerFullException, VersionException
+from .models import Mode, Color
 from .networking import ClientServerBase, ConnectionBase
 from .ui import UI, EventType
 
@@ -30,6 +31,7 @@ class Client(ClientServerBase):
         self.stones = {}
         self.color = None
         self.mode = None
+        self.turn = False
         self.timeout = timeout
         self._connection = None
 
@@ -79,6 +81,9 @@ class Client(ClientServerBase):
         Runs the client and connects to the server
         """
         await self._connect()
+
+        if self.mode == Mode.LOCAL:
+            self.color = Color.BLACK
         self.ui = UI(self)
 
         await asyncio.gather(self._event_worker(), self.ui.run())

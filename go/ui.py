@@ -78,6 +78,8 @@ class UI:
             if e.type == MOUSEBUTTONDOWN and e.button == 1:
                 await self._send(EventType.PLACE_STONE, pos=pos)
             elif e.type == MOUSEMOTION:
+                if not self.client.turn:
+                    return
                 if self.highlight:
                     self.highlight.pos = pos
                     self.highlight.color = self.client.color
