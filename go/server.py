@@ -28,7 +28,7 @@ class Connection(ConnectionBase):
         elif request != f"go {__version__}":
             await self.send("no")
         else:
-            await self.send(f"ok {__version__}")
+            await self.send(f"ok {request.split()[1]}")
 
     async def serve(self):
         await self._handshake()
