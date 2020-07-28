@@ -15,6 +15,7 @@ class Mode(Enum):
 class Color(Enum):
     BLACK = 0
     WHITE = 1
+    ALL = -1
 
 
 class Direction(Enum):
