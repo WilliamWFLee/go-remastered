@@ -8,7 +8,8 @@ from collections import namedtuple
 from tkinter import Button, Entry, Label, Tk, W, messagebox
 
 from .client import Client
-from .server import Mode, Server
+from .server import Server
+from .models import Mode
 
 PADDING = {
     "padx": 10,

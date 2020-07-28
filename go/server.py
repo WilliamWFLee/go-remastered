@@ -1,19 +1,13 @@
 # -*- coding: utf-8 -*-
 
 import asyncio
-from enum import Enum, auto
 
 from . import __version__
 from .errors import DataException
-from .models import GameState, Position
+from .models import GameState
 from .networking import ClientServerBase, ConnectionBase
 
 DEFAULT_HOST = "0.0.0.0"
-
-
-class Mode(Enum):
-    LOCAL = auto()
-    NORMAL = auto()
 
 
 class Connection(ConnectionBase):
@@ -22,28 +16,22 @@ class Connection(ConnectionBase):
         self.server = server
 
     async def _handshake(self):
-        request = await self.recv()
-        if not request.startswith("go"):
-            raise DataException(f"Invalid handshake request {request!r}")
-        elif request != f"go {__version__}":
+        try:
+            version = await self.recv("go")
+        except DataException:
+            raise DataException("Invalid handshake request")
+
+        if version != __version__:
             await self.send("no")
         else:
-            await self.send(f"ok {request.split()[1]}")
+            await self.send("ok", version)
 
     async def _setup(self):
-        await self.send(f"mode {self.server.mode.name.lower()}")
-
-        stones_string = ""
-        for y in range(self.server.game_state.board_size):
-            for x in range(self.server.game_state.board_size):
-                pos = Position(x, y)
-                if pos not in self.server.game_state.stones:
-                    stones_string += "x"
-                else:
-                    stone = self.server.game_state.stones[pos]
-                    stones_string += stone.color.value
-
-        await self.send(f"stones {stones_string}")
+        await self.send("mode", self.server.mode)
+        await self.send(
+            "stones", (self.server.game_state.stones, self.server.game_state.board_size)
+        )
+        await self.recv("ack")
         await self.send("ready")
 
     async def serve(self):
