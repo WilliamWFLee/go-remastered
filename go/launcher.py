@@ -131,14 +131,23 @@ class Launcher:
                 await self.server.close()
 
     async def run_server(self, board_size, host=None, port=None, *, mode):
+        """
+        Runs a server with the specified parameters
+        """
         self.server = Server(board_size, host=host, port=port, mode=mode)
         await self.server.serve()
 
     async def run_client(self, host=None, port=None, timeout=None):
+        """
+        Runs a client with the specified connection details
+        """
         self.client = Client(host, port, timeout=timeout)
         await self.client.run()
 
     async def launch_local_game(self):
+        """
+        Launches a local game of Go
+        """
         self._size_label.config(fg="#000")
 
         board_size = self._size_entry.get()
@@ -163,4 +172,7 @@ class Launcher:
         )
 
     def mainloop(self) -> None:
+        """
+        Runs the launcher mainloop
+        """
         self._root.mainloop()

@@ -10,18 +10,25 @@ DEFAULT_PORT = 18255
 
 
 class ClientServerBase:
+    """
+    Common base for clients and servers
+    """
     def __init__(self, host, port=None):
         self.host = host
         self.port = port if port else DEFAULT_PORT
 
 
 class ConnectionBase:
+    """
+    Common for both client and server connections
+    """
     def __init__(self, reader, writer, timeout=None):
         self.reader = reader
         self.writer = writer
         self.timeout = timeout
 
     def _serialize(self, key: str = "", value: Any = None):
+        # Serializes data for transmission
         serialized = ""
         if key in ("go", "ok"):
             serialized = f"{value}"
@@ -44,6 +51,7 @@ class ConnectionBase:
         return f"{f'{key} ' if key else ''}{serialized}\n"
 
     def _deserialize(self, data: str):
+        # Deserializes data for transmission
         key, *value = data.split(maxsplit=1)
         if not value:
             return (key, None)
@@ -87,11 +95,17 @@ class ConnectionBase:
                 raise DataException(f"{color_value} is not a valid color value")
 
     async def send(self, key, value=None):
+        """
+        Sends data according with the given key, and optionally an associated value
+        """
         data = self._serialize(key, value)
         self.writer.write(data.encode())
         await self.writer.drain()
 
     async def recv(self, *keys):
+        """
+        Receives data, expecting the key to be one of those specified
+        """
         try:
             data = await asyncio.wait_for(
                 self.reader.readuntil(b"\n"), timeout=self.timeout
@@ -104,5 +118,8 @@ class ConnectionBase:
             raise ConnectionTimeoutError("Timeout exceeded.")
 
     async def close(self):
+        """
+        Closes the connection
+        """
         self.writer.close()
         await self.writer.wait_closed()

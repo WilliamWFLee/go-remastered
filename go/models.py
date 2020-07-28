@@ -8,17 +8,26 @@ DEFAULT_BOARD_SIZE = 19
 
 
 class Mode(Enum):
-    LOCAL = auto()
-    NORMAL = auto()
+    """
+    Indicates the client-server mode
+    """
+    LOCAL = auto()  # For local games
+    NORMAL = auto()  # For regular servers
 
 
 class Color(Enum):
+    """
+    Color of stone, for stones, player colors, etc.
+    """
     BLACK = 0
     WHITE = 1
-    ALL = -1
+    ALL = -1  # For use in local games
 
 
 class Direction(Enum):
+    """
+    The permitted directions on the board
+    """
     UP = (0, -1)
     DOWN = (0, 1)
     LEFT = (-1, 0)
@@ -29,6 +38,9 @@ PositionBase = namedtuple("PositionBase", "x y")
 
 
 class Position(PositionBase):
+    """
+    Represents a position on the Go board
+    """
     def __lt__(self, other):
         if isinstance(other, type(self)):
             return not (self.x > other.x or self.y > other.y)
@@ -74,6 +86,9 @@ class Position(PositionBase):
 
 
 class Ring:
+    """
+    Represents a Ring, for turn highlighting and stones
+    """
     def __init__(self, pos: Position, color: Color):
         self.pos = pos
         self.color = color
@@ -86,6 +101,9 @@ class Ring:
 
 
 class Stone(Ring):
+    """
+    Represents a stone. Inherits from Ring
+    """
     def __init__(self, pos: Position, color: Color):
         super().__init__(pos, color)
         self.group = Group(color, self)
@@ -106,16 +124,27 @@ class Stone(Ring):
 
 
 class Group:
+    """
+    Represents a group of connected stones
+    """
     def __init__(self, color: Color, *stones: Stone):
         self.color = color
         self.stones = list(stones)
 
     @property
     def can_capture(self):
+        """
+        Whether or not this group can be captured
+        """
         return all(not stone.is_free for stone in self.stones)
 
     @classmethod
     def merge(cls, groups: List["Group"]):
+        """
+        Merge groups of stones together
+
+        If the length of ``groups`` is 1, then return that group
+        """
         if len(groups) == 1:
             return groups[0]
 
@@ -143,7 +172,7 @@ HistoryEntry = namedtuple("HistoryEntry", "pos captures")
 
 class GameState:
     """
-    Class for representing a game of Go
+    Representing a game of Go
     """
 
     def __init__(self, board_size: Optional[int] = None):
@@ -156,6 +185,9 @@ class GameState:
 
     @property
     def groups(self) -> Dict[Color, Set[Group]]:
+        """
+        The groups of stones in the game
+        """
         groups = {color: set() for color in Color}
         for stone in self.stones.values():
             groups[stone.color].add(stone.group)
@@ -163,11 +195,17 @@ class GameState:
         return groups
 
     def toggle_color(self):
+        """
+        Toggle the current color whose turn it is
+        """
         self.current_color = (
             Color.WHITE if self.current_color == Color.BLACK else Color.BLACK
         )
 
     def place_stone(self, pos):
+        """
+        Place a stone on the board at the specified position
+        """
         new_stone = Stone(pos, self.current_color)
         self.stones[pos] = new_stone
         merge_groups = [new_stone.group]
@@ -189,11 +227,17 @@ class GameState:
         self.history_position += 1
 
     def remove_stone(self, pos):
+        """
+        Remove a stone from the board
+        """
         stone = self.stones[pos]
         del self.stones[pos]
         stone.group.stones.remove(stone)
 
     def perform_captures(self):
+        """
+        Performs any captures required in the current state of the board
+        """
         captures = {color: [] for color in Color}
         for color in (
             Color.WHITE if self.current_color == Color.BLACK else Color.BLACK,
@@ -212,6 +256,9 @@ class GameState:
         }
 
     def update_liberties(self):
+        """
+        Updates the liberties of each stone
+        """
         for stone in self.stones.values():
             for direction in Direction:
                 adj_pos = stone.pos + direction.value
