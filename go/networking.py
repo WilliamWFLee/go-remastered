@@ -13,6 +13,7 @@ class ClientServerBase:
     """
     Common base for clients and servers
     """
+
     def __init__(self, host, port=None):
         self.host = host
         self.port = port if port else DEFAULT_PORT
@@ -22,6 +23,7 @@ class ConnectionBase:
     """
     Common for both client and server connections
     """
+
     def __init__(self, reader, writer, timeout=None):
         self.reader = reader
         self.writer = writer

@@ -14,6 +14,7 @@ class Connection(ConnectionBase):
     """
     Represents the server's connection to a client
     """
+
     def __init__(self, server, reader, writer, timeout=None):
         super().__init__(reader, writer, timeout=timeout)
         self.server = server
@@ -49,6 +50,7 @@ class Server(ClientServerBase):
     """
     Represents the server
     """
+
     def __init__(self, board_size, host=None, port=None, *, mode):
         super().__init__(host if host else DEFAULT_HOST, port=port)
         self.mode = mode

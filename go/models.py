@@ -11,6 +11,7 @@ class Mode(Enum):
     """
     Indicates the client-server mode
     """
+
     LOCAL = auto()  # For local games
     NORMAL = auto()  # For regular servers
 
@@ -19,6 +20,7 @@ class Color(Enum):
     """
     Color of stone, for stones, player colors, etc.
     """
+
     BLACK = 0
     WHITE = 1
     ALL = -1  # For use in local games
@@ -28,6 +30,7 @@ class Direction(Enum):
     """
     The permitted directions on the board
     """
+
     UP = (0, -1)
     DOWN = (0, 1)
     LEFT = (-1, 0)
@@ -41,6 +44,7 @@ class Position(PositionBase):
     """
     Represents a position on the Go board
     """
+
     def __lt__(self, other):
         if isinstance(other, type(self)):
             return not (self.x > other.x or self.y > other.y)
@@ -89,6 +93,7 @@ class Ring:
     """
     Represents a Ring, for turn highlighting and stones
     """
+
     def __init__(self, pos: Position, color: Color):
         self.pos = pos
         self.color = color
@@ -104,6 +109,7 @@ class Stone(Ring):
     """
     Represents a stone. Inherits from Ring
     """
+
     def __init__(self, pos: Position, color: Color):
         super().__init__(pos, color)
         self.group = Group(color, self)
@@ -127,6 +133,7 @@ class Group:
     """
     Represents a group of connected stones
     """
+
     def __init__(self, color: Color, *stones: Stone):
         self.color = color
         self.stones = list(stones)

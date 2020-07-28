@@ -15,6 +15,7 @@ class Connection(ConnectionBase):
     """
     Represents the client connection. Network communications happen via this class
     """
+
     pass
 
 
@@ -22,6 +23,7 @@ class Client(ClientServerBase):
     """
     Represents a client
     """
+
     def __init__(self, host=None, port=None, timeout=None):
         """
         Instantiates the client instance. This is usually done by the launcher
