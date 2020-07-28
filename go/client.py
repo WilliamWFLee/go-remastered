@@ -21,14 +21,16 @@ class Client(ClientServerBase):
         self.stones = {}
         self.color = None
         self.timeout = timeout
+        self._connection = None
 
     async def _connect(self):
         reader, writer = await asyncio.open_connection(self.host, self.port)
         self._connection = Connection(reader, writer)
         await self._handshake()
 
-    async def _disconnect(self):
-        await self._connection.close()
+    async def disconnect(self):
+        if self._connection is not None:
+            await self._connection.close()
 
     async def _handshake(self):
         response = await self._connection.send_recv(f"go {__version__}")

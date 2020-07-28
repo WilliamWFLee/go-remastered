@@ -24,6 +24,9 @@ class Launcher:
     """
 
     def __init__(self):
+        self.client = None
+        self.server = None
+
         self._root = Tk()
         self._root.title("Go Launcher")
         self._root.resizable(False, False)
@@ -59,9 +62,9 @@ class Launcher:
 
         # Go button
         self._go_button = Button(
-            self._root, text="Go!", command=lambda: self._go_command(), padx=40
+            self._root, text="Go!", command=lambda: asyncio.run(self.launch()), padx=40
         )
-        self._root.bind("<Return>", self._go_command)
+        self._root.bind("<Return>", lambda: asyncio.run(self.launch()))
 
         self._widgets = [
             self._local_game_button,
@@ -77,17 +80,6 @@ class Launcher:
 
         self._show_main_menu()
 
-    @property
-    def _go_command(self):
-        return self.__go_command
-
-    @_go_command.setter
-    def _go_command(self, func):
-        def wrapper():
-            func()
-            self._root.destroy()
-        self.__go_command = wrapper
-
     def _screen_change(self):
         for widget in self._widgets:
             widget.grid_forget()
@@ -102,7 +94,7 @@ class Launcher:
 
     def _show_local_game_setup(self):
         self._screen_change()
-        self._go_command = lambda: asyncio.run(self.launch_local_game())
+        self._go_command = self.launch_local_game
 
         self._size_label.grid(row=0, column=0, sticky=W, **PADDING)
         self._size_entry.grid(row=0, column=1, **PADDING)
@@ -138,8 +130,12 @@ class Launcher:
                 await self.server.close()
 
     async def run_server(self, board_size, host=None, port=None, *, mode):
-        self.server = Server(board_size, host=host, port=port)
+        self.server = Server(board_size, host=host, port=port, mode=mode)
         await self.server.serve()
+
+    async def run_client(self, host=None, port=None, timeout=None):
+        self.client = Client(host, port, timeout=timeout)
+        await self.client.run()
 
     async def launch_local_game(self):
         self._size_label.config(fg="#000")
@@ -158,16 +154,12 @@ class Launcher:
             self._size_label.config(fg="red")
             return
 
-        # Destroys Tk root if config is successful
+        # Withdraws Tk root if config is successful
         self._root.withdraw()
 
-        asyncio.create_task(self.run_server(board_size, "127.0.0.1", mode=Mode.LOCAL))
-
-        self.client = Client()
-        await self.client.run()
-
-        await self.server.close()
-        self._root.destroy()
+        await asyncio.gather(
+            self.run_server(board_size, "127.0.0.1", mode=Mode.LOCAL), self.run_client()
+        )
 
     def mainloop(self) -> None:
         self._root.mainloop()
