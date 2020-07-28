@@ -123,6 +123,20 @@ class Launcher:
     def _on_close(self):
         self._root.destroy()
 
+    async def launch(self):
+        try:
+            await self._go_command()
+        except Exception:
+            self._root.deiconify()
+            raise
+        else:
+            self._root.destroy()
+        finally:
+            if self.client is not None:
+                await self.client.disconnect()
+            if self.server is not None:
+                await self.server.close()
+
     async def run_server(self, board_size, host=None, port=None, *, mode):
         self.server = Server(board_size, host=host, port=port)
         await self.server.serve()
