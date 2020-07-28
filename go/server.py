@@ -11,7 +11,7 @@ from .networking import ClientServerBase, ConnectionBase
 DEFAULT_HOST = "0.0.0.0"
 
 
-class Mode:
+class Mode(Enum):
     LOCAL = auto()
     NORMAL = auto()
 
