@@ -49,17 +49,12 @@ Indicating turn
 ~~~~~~~~~~~~~~~
 
 1. The server sends ``yourturn <color>``, where ``<color>`` is as it is for ``color <color>``, to the client whose turn it is.
-2. The client responds ``ack`` to acknowledge.
 
 Stone placement
 ~~~~~~~~~~~~~~~
 
 1. The client sends ``place <x> <y>`` where ``<x>`` and ``<y>`` are the coordinates of the stone to be placed, so ``place 0 0`` would be the top-left intersection on the board, and ``place 18 18`` would be the bottom-right intersection for a 19x19 board.
 2. The server then broadcasts ``place <color> <x> <y>`` to all clients, including the sender, where ``<color>`` is ``0`` for black or ``1`` for white.
-
-   a. Each client sends back ``ack`` to acknowledge the placement.
-
-3. The server then sends ``ack`` back to the sender.
 
 
 Stone removal
@@ -68,7 +63,6 @@ Stone removal
 A removal of a stone only happens when a placement of a stone causes stones to be captured according to the rules of the game.
 
 1. The server sends ``remove <x1> <y1> <x2> <y2> ... <xn> <yn>``, where each pair ``<xi> <yi>`` is a pair of coordinates for the stone to be removed.
-2. The client sends ``ack`` to the server to acknowledge the removal(s).
 
 Ending connection
 -----------------
