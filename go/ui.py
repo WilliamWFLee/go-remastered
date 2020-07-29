@@ -54,14 +54,13 @@ class Event:
 
 
 class UI:
-    def __init__(self, client):
-        self.client = client
-        self.display_size = 2 * (DEFAULT_SQUARE_WIDTH * self.client.board_size,)
+    def __init__(self, state):
+        self.state = state
+        self.display_size = 2 * (DEFAULT_SQUARE_WIDTH * self.state.board_size,)
         self._calculate_geometry()
 
         self.highlight: Optional[Ring] = None  # Indicates whose turn it is
 
-        self._outgoing_event_q = asyncio.Queue()
         self._loop = asyncio.get_running_loop()
         self._pool = concurrent.futures.ThreadPoolExecutor()
 
@@ -73,23 +72,23 @@ class UI:
             ]
         )
         if (0, 0) <= pos <= 2 * (
-            self.client.board_size - 1,
-        ) and pos not in self.client.stones:
+            self.state.board_size - 1,
+        ) and pos not in self.state.stones:
             if e.type == MOUSEBUTTONDOWN and e.button == 1:
                 await self._send(EventType.PLACE_STONE, pos=pos)
             elif e.type == MOUSEMOTION:
-                if not self.client.turn:
+                if not self.state.turn:
                     return
                 if self.highlight:
                     self.highlight.pos = pos
-                    self.highlight.color = self.client.color
+                    self.highlight.color = self.state.color
                 else:
-                    self.highlight = Ring(pos, self.client.color)
+                    self.highlight = Ring(pos, self.state.color)
         elif e.type == MOUSEMOTION:
             self.highlight = None
 
     def _draw_board(self, surface):
-        for x in range(self.client.board_size):  # Draws lines
+        for x in range(self.state.board_size):  # Draws lines
             start = (
                 int((x + 0.5) * self.square_width),
                 self.square_width // 2,
@@ -99,7 +98,7 @@ class UI:
                 self.board_width - self.square_width // 2,
             )
             pygame.draw.line(surface, FG_COLOR, start, end, LINE_WIDTH)
-        for y in range(self.client.board_size):
+        for y in range(self.state.board_size):
             start = (
                 self.square_width // 2,
                 int((y + 0.5) * self.square_width),
@@ -111,7 +110,7 @@ class UI:
             pygame.draw.line(surface, FG_COLOR, start, end, LINE_WIDTH)
 
         # Draws hoshi positions
-        for x, y in HOSHI_POSITIONS[self.client.board_size]:
+        for x, y in HOSHI_POSITIONS[self.state.board_size]:
             for f in (pygame.gfxdraw.aacircle, pygame.gfxdraw.filled_circle):
                 f(
                     surface,
@@ -137,8 +136,8 @@ class UI:
         pygame.gfxdraw.filled_circle(surface, *self._get_ring_draw_options(stone))
 
     def _calculate_geometry(self):
-        self.square_width = min(self.display_size) // self.client.board_size
-        self.board_width = self.square_width * self.client.board_size
+        self.square_width = min(self.display_size) // self.state.board_size
+        self.board_width = self.square_width * self.state.board_size
         self.hoshi_radius = int(HOSHI_RADIUS_SCALE * self.square_width)
         self.stone_radius = int(STONE_RADIUS_SCALE * self.square_width)
         self.display_padding = tuple(
@@ -152,7 +151,7 @@ class UI:
 
     async def _send(self, event_type, **attrs):
         event = Event(event_type, **attrs)
-        await self._outgoing_event_q.put(event)
+        await self.state._outgoing_event_q.put(event)
 
     async def render(self):
         self.display.fill(BOARD_COLOR)  # Set board color
@@ -161,7 +160,7 @@ class UI:
         board_surface.fill(BOARD_COLOR)
 
         self._draw_board(board_surface)
-        for stone in self.client.stones.values():
+        for stone in self.state.stones.values():
             self._draw_stone(board_surface, stone)
         if self.highlight is not None:
             self._draw_ring(board_surface, self.highlight)
@@ -194,7 +193,7 @@ class UI:
                 elif e.type == VIDEORESIZE:
                     self._resize(e.size)
             if running:
-                await self._outgoing_event_q.join()
+                await self.state._outgoing_event_q.join()
                 await self.render()
 
         pygame.quit()

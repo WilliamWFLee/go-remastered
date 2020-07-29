@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+import asyncio
 from collections import namedtuple
 from enum import Enum, auto
 from typing import Dict, List, Optional, Set
@@ -275,3 +276,12 @@ class GameState:
                     stone.liberties[direction] = True
                 else:
                     stone.liberties[direction] = False
+
+
+class ClientState:
+    def __init__(self):
+        self.board_size = None
+        self.stones = {}
+        self.color = None
+        self.turn = False
+        self._outgoing_event_q = asyncio.Queue()

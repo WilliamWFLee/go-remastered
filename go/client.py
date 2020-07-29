@@ -4,7 +4,7 @@ import asyncio
 
 from . import __version__
 from .errors import DataException, ServerFullException, VersionException
-from .models import Mode, Color
+from .models import Mode, Color, ClientState
 from .networking import ClientServerBase, ConnectionBase
 from .ui import UI, EventType
 
@@ -29,11 +29,7 @@ class Client(ClientServerBase):
         Instantiates the client instance. This is usually done by the launcher
         """
         super().__init__(host=host if host else DEFAULT_HOST, port=port)
-        self.board_size = None
-        self.stones = {}
-        self.color = None
-        self.mode = None
-        self.turn = False
+        self.state = ClientState()
         self.timeout = timeout
         self._connection = None
 
@@ -50,8 +46,8 @@ class Client(ClientServerBase):
         if response is None:
             raise ServerFullException()
 
-        self.mode = response
-        self.stones, self.board_size = await self._connection.recv("stones")
+        self.state.mode = response
+        self.state.stones, self.state.board_size = await self._connection.recv("stones")
 
         await self._connection.send("ack")
         await self._connection.recv("ready")
@@ -73,10 +69,10 @@ class Client(ClientServerBase):
         # Event worker for fetching game events from the UI event queue
         # and dispatching them to the server
         while True:
-            event = await self.ui._outgoing_event_q.get()
-            if event.type == EventType.PLACE_STONE:
-                self.game_state.place_stone(event.pos)
-            self.ui._outgoing_event_q.task_done()
+            event = await self.state._outgoing_event_q.get()
+            # if event.type == EventType.PLACE_STONE:
+            #     self.state.place_stone(event.pos)
+            self.state._outgoing_event_q.task_done()
 
     async def run(self):
         """
@@ -84,9 +80,9 @@ class Client(ClientServerBase):
         """
         await self._connect()
 
-        if self.mode == Mode.LOCAL:
-            self.color = Color.BLACK
-        self.ui = UI(self)
+        if self.state.mode == Mode.LOCAL:
+            self.state.color = Color.BLACK
+        self.ui = UI(self.state)
 
         await asyncio.gather(self._event_worker(), self.ui.run())
         await self._disconnect()
