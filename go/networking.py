@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 
 import asyncio
-from typing import Any
+from typing import Any, Tuple, Dict
 
 from .errors import ConnectionTimeoutError, DataException
-from .models import Mode, Position, Stone, Color
+from .models import Color, Mode, Position, Stone
 
 DEFAULT_PORT = 18255
 
@@ -29,7 +29,7 @@ class ConnectionBase:
         self.writer = writer
         self.timeout = timeout
 
-    def _serialize(self, key: str = "", value: Any = None):
+    def _serialize(self, key: str = "", value: Any = None) -> str:
         # Serializes data for transmission
         serialized = ""
         if key in ("go", "ok"):
@@ -52,7 +52,7 @@ class ConnectionBase:
 
         return f"{f'{key} ' if key else ''}{serialized}\n"
 
-    def _deserialize(self, data: str):
+    def _deserialize(self, data: str) -> Tuple[str, Any]:
         # Deserializes data for transmission
         key, *value = data.split(maxsplit=1)
         if not value:
@@ -104,7 +104,7 @@ class ConnectionBase:
         self.writer.write(data.encode())
         await self.writer.drain()
 
-    async def recv(self, *keys):
+    async def recv(self, *keys) -> Dict[str, Any]:
         """
         Receives data, expecting the key to be one of those specified
         """

@@ -3,7 +3,7 @@
 import asyncio
 from collections import namedtuple
 from enum import Enum, auto
-from typing import Dict, List, Optional, Set
+from typing import Dict, List, Optional, Set, Tuple
 
 DEFAULT_BOARD_SIZE = 19
 
@@ -242,7 +242,7 @@ class GameState:
         del self.stones[pos]
         stone.group.stones.remove(stone)
 
-    def perform_captures(self):
+    def perform_captures(self) -> Dict[Color, Optional[Tuple[Position, ...]]]:
         """
         Performs any captures required in the current state of the board
         """

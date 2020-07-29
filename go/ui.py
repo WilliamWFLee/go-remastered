@@ -3,7 +3,7 @@
 import asyncio
 import concurrent.futures
 from enum import Enum, auto
-from typing import Optional
+from typing import Optional, Tuple
 
 import pygame
 import pygame.gfxdraw
@@ -120,7 +120,9 @@ class UI:
                     FG_COLOR,
                 )
 
-    def _get_ring_draw_options(self, ring: Ring):
+    def _get_ring_draw_options(
+        self, ring: Ring
+    ) -> Tuple[int, int, int, Tuple[int, int, int]]:
         return (
             int((ring.pos.x + 0.5) * self.square_width),
             int((ring.pos.y + 0.5) * self.square_width),

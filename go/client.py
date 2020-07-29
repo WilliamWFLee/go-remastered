@@ -4,7 +4,7 @@ import asyncio
 
 from . import __version__
 from .errors import DataException, ServerFullException, VersionException
-from .models import Mode, Color, ClientState
+from .models import ClientState, Color, Mode
 from .networking import ClientServerBase, ConnectionBase
 from .ui import UI, EventType
 
