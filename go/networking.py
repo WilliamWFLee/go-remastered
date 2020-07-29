@@ -113,9 +113,9 @@ class ConnectionBase:
                 self.reader.readuntil(b"\n"), timeout=self.timeout
             )
             key, value = self._deserialize(data[:-1].decode())
-            if key not in keys:
+            if keys and key not in keys:
                 raise DataException(f"Expected key to be one of {keys}, got {key!r}")
-            return value
+            return {key: value}
         except asyncio.TimeoutError:
             raise ConnectionTimeoutError("Timeout exceeded.")
 

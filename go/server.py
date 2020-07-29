@@ -21,9 +21,11 @@ class Connection(ConnectionBase):
 
     async def _handshake(self):
         try:
-            version = await self.recv("go")
+            response = await self.recv("go")
         except DataException:
             raise DataException("Invalid handshake request")
+        else:
+            version = response["go"]
 
         if version != __version__:
             await self.send("no")

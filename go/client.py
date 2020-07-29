@@ -36,18 +36,20 @@ class Client(ClientServerBase):
     async def _handshake(self):
         await self._connection.send("go", __version__)
         response = await self._connection.recv("no", "ok")
-        if response is None:
+        if "ok" not in response:
             raise VersionException(f"Server does not support version {__version__}")
-        elif response != __version__:
+        elif response["ok"] != __version__:
             raise DataException(f"Invalid handshake response {response!r}")
 
     async def _setup(self):
         response = await self._connection.recv("full", "mode")
-        if response is None:
+        if "full" in response:
             raise ServerFullException()
 
-        self.state.mode = response
-        self.state.stones, self.state.board_size = await self._connection.recv("stones")
+        self.state.mode = response["mode"]
+        self.state.stones, self.state.board_size = (
+            await self._connection.recv("stones")
+        )["stones"]
 
         await self._connection.send("ack")
         await self._connection.recv("ready")
