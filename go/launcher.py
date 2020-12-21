@@ -108,7 +108,7 @@ class Launcher:
         self._host_label.grid(row=0, column=0, sticky=W, **PADDING)
         self._host_entry.grid(row=0, column=1, **PADDING)
 
-        self._port_label(row=1, column=0, sticky=W, **PADDING)
+        self._port_label.grid(row=1, column=0, sticky=W, **PADDING)
         self._port_entry.grid(row=1, column=1, **PADDING)
 
         self._go_button.grid(row=2, column=0, columnspan=2, **PADDING)
